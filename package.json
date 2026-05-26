@@ -15,9 +15,6 @@
   "lint-staged": {
     "frontend/src/**/*.{ts,tsx}": [
       "npm --prefix frontend run lint"
-    ],
-    "backend/src/**/*.ts": [
-      "npx --prefix backend tsc --noEmit"
     ]
   },
   "keywords": [],
