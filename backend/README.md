@@ -6,28 +6,30 @@ Este é o ecossistema de backend da aplicação, desenvolvido em **Node.js** uti
 
 ## 🏗️ Arquitetura e Design de Software
 
-O projeto adota uma abordagem moderna de **Clean Architecture**, utilizando uma divisão vertical por módulos (*Vertical Slicing*). 
+O projeto adota uma abordagem moderna de **Clean Architecture**, utilizando uma divisão vertical por módulos (_Vertical Slicing_).
 
 ### Pilares da Escolha Arquitetural
+
 1. **Alta Coesão**: Todas as responsabilidades de um mesmo contexto de negócio são agrupadas sob o mesmo módulo (`src/modules/nome-do-modulo`). Isso elimina a necessidade de navegar por pastas globais distantes para dar manutenção a um único recurso.
 2. **Baixo Acoplamento**: Mantemos a regra de ouro da Clean Architecture intacta. A lógica de negócio e os casos de uso são independentes de frameworks, drivers e ferramentas externas (como Express ou Prisma).
-3. **Escalabilidade Pragmática**: Evita o *overengineering* de dezenas de pastas vazias na raiz desde o primeiro dia. O projeto cresce de forma orgânica.
+3. **Escalabilidade Pragmática**: Evita o _overengineering_ de dezenas de pastas vazias na raiz desde o primeiro dia. O projeto cresce de forma orgânica.
 
 ---
 
 ## 🛠️ Tecnologias e Decisões de Libs
 
-* **Express**: Escolhido por sua maturidade, estabilidade e flexibilidade no ecossistema Node.js.
-* **Prisma ORM (v6)**: Acoplado para a comunicação com o banco MySQL. Proporciona tipagem estática ponta a ponta gerada automaticamente a partir do schema de dados.
-* **jsonwebtoken (JWT)**: Adotado para controle de autenticação via credenciais administrativas seguras mapeadas no `.env`.
-* **Jest & ts-jest**: Framework de testes unitários. A execução foi otimizada via `isolatedModules`, reduzindo o tempo de inicialização de testes para a escala de milissegundos.
+- **Express**: Escolhido por sua maturidade, estabilidade e flexibilidade no ecossistema Node.js.
+- **Prisma ORM (v6)**: Acoplado para a comunicação com o banco MySQL. Proporciona tipagem estática ponta a ponta gerada automaticamente a partir do schema de dados.
+- **jsonwebtoken (JWT)**: Adotado para controle de autenticação via credenciais administrativas seguras mapeadas no `.env`.
+- **Jest & ts-jest**: Framework de testes unitários. A execução foi otimizada via `isolatedModules`, reduzindo o tempo de inicialização de testes para a escala de milissegundos.
+- **Supertest**: Integrado ao Jest para a execução de testes de integração (E2E), permitindo validar o fluxo completo das rotas HTTP e _Controllers_ sem a necessidade de instanciar portas de rede.
 
 ---
 
 ## 🚀 Integração Contínua (CI/CD)
 
-* **Husky (Local)**: Valida as mensagens de commit (*Commitlint*) e intercepta o comando `git push`, impedindo o envio em caso de falhas de tipagem estática ou quebra de testes.
-* **GitHub Actions (Nuvem)**: Pipeline automatizada a cada push para a branch `main`, garantindo qualidade do build final.
+- **Husky (Local)**: Valida as mensagens de commit (_Commitlint_) e intercepta o comando `git push`, impedindo o envio em caso de falhas de tipagem estática ou quebra de testes.
+- **GitHub Actions (Nuvem)**: Pipeline automatizada a cada push para a branch `main`, garantindo qualidade do build final.
 
 ---
 
@@ -56,6 +58,7 @@ O projeto adota uma abordagem moderna de **Clean Architecture**, utilizando uma 
 ## 🧪 Executando a Suíte de Testes
 
 Para rodar os testes unitários isolados:
+
 ```bash
 npm run test
 ```
