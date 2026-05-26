@@ -24,6 +24,9 @@ jobs:
       - name: Install backend dependencies
         run: npm --prefix backend install
 
+      - name: Generate Prisma Client
+        run: cd backend && npx prisma generate
+
       - name: Install frontend dependencies
         run: npm --prefix frontend install
 
