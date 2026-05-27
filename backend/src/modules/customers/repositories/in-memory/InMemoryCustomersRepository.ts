@@ -9,6 +9,11 @@ export class InMemoryCustomersRepository implements ICustomersRepository {
     return customer || null;
   }
 
+  async findById(id: number): Promise<Customer | null> {
+    const customer = this.items.find((item) => item.id === id);
+    return customer || null;
+  }
+
   async countByCity(): Promise<CustomersTotalByCity[]> {
     const counts = this.items.reduce(
       (acc, customer) => {

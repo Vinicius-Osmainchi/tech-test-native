@@ -1,7 +1,11 @@
 import { Customer as PrismaCustomer } from "@prisma/client";
 import { prisma } from "../../../../../shared/infra/database/prisma/client";
 import { Customer } from "../../../domain/Customer";
-import { ICustomersRepository, CustomersTotalByCity, PaginatedCustomers } from "../../../repositories/ICustomersRepository";
+import {
+  ICustomersRepository,
+  CustomersTotalByCity,
+  PaginatedCustomers,
+} from "../../../repositories/ICustomersRepository";
 
 export class PrismaCustomersRepository implements ICustomersRepository {
   private mapToDomain(prismaCustomer: PrismaCustomer): Customer {
@@ -20,6 +24,16 @@ export class PrismaCustomersRepository implements ICustomersRepository {
   async findByEmail(email: string): Promise<Customer | null> {
     const customer = await prisma.customer.findFirst({
       where: { email },
+    });
+
+    if (!customer) return null;
+
+    return this.mapToDomain(customer);
+  }
+
+  async findById(id: number): Promise<Customer | null> {
+    const customer = await prisma.customer.findUnique({
+      where: { id },
     });
 
     if (!customer) return null;

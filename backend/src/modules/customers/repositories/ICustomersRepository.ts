@@ -12,6 +12,7 @@ export interface PaginatedCustomers {
 
 export interface ICustomersRepository {
   findByEmail(email: string): Promise<Customer | null>;
+  findById(id: number): Promise<Customer | null>;
   countByCity(): Promise<CustomersTotalByCity[]>;
- findManyByCity(city: string, page: number, limit: number): Promise<PaginatedCustomers>;
+  findManyByCity(city: string, page: number, limit: number): Promise<PaginatedCustomers>;
 }
