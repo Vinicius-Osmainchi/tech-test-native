@@ -1,5 +1,10 @@
 import { Customer } from "../../domain/Customer";
-import { ICustomersRepository, CustomersTotalByCity, PaginatedCustomers } from "../ICustomersRepository";
+import {
+  ICustomersRepository,
+  CustomersTotalByCity,
+  PaginatedCustomers,
+  UpdateCustomerDTO,
+} from "../ICustomersRepository";
 
 export class InMemoryCustomersRepository implements ICustomersRepository {
   public items: Customer[] = [];
@@ -39,5 +44,24 @@ export class InMemoryCustomersRepository implements ICustomersRepository {
       customers: paginatedCustomers,
       total: filteredCustomers.length,
     };
+  }
+
+  async update(id: number, data: UpdateCustomerDTO): Promise<Customer> {
+    const index = this.items.findIndex((item) => item.id === id);
+
+    const updatedCustomer = {
+      ...this.items[index],
+      ...data,
+      firstName: data.firstName ?? this.items[index].firstName,
+      lastName: data.lastName ?? this.items[index].lastName,
+      email: data.email ?? this.items[index].email,
+      gender: data.gender ?? this.items[index].gender,
+      company: data.company ?? this.items[index].company,
+      city: data.city ?? this.items[index].city,
+      title: data.title ?? this.items[index].title,
+    };
+
+    this.items[index] = updatedCustomer;
+    return updatedCustomer;
   }
 }

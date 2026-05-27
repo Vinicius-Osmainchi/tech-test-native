@@ -5,6 +5,7 @@ import {
   ICustomersRepository,
   CustomersTotalByCity,
   PaginatedCustomers,
+  UpdateCustomerDTO,
 } from "../../../repositories/ICustomersRepository";
 
 export class PrismaCustomersRepository implements ICustomersRepository {
@@ -72,5 +73,21 @@ export class PrismaCustomersRepository implements ICustomersRepository {
       customers: customers.map((customer) => this.mapToDomain(customer)),
       total,
     };
+  }
+  async update(id: number, data: UpdateCustomerDTO): Promise<Customer> {
+    const updatedCustomer = await prisma.customer.update({
+      where: { id },
+      data: {
+        first_name: data.firstName,
+        last_name: data.lastName,
+        email: data.email,
+        city: data.city,
+        title: data.title,
+        company: data.company,
+        gender: data.gender,
+      },
+    });
+
+    return this.mapToDomain(updatedCustomer);
   }
 }
