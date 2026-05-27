@@ -1,8 +1,5 @@
-import "dotenv/config";
-import { app } from "../shared/infra/http/app";
+import { server } from "../shared/infra/http/app";
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+server.listen(3000, () => {
+  console.log("Server is running on port 3000");
 });

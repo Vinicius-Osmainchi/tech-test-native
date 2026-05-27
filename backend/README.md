@@ -22,7 +22,6 @@ O projeto adota uma abordagem moderna de **Clean Architecture**, utilizando uma 
 - **Prisma ORM (v6)**: Acoplado para a comunicação com o banco MySQL. Proporciona tipagem estática ponta a ponta gerada automaticamente a partir do schema de dados.
 - **jsonwebtoken (JWT)**: Adotado para controle de autenticação via credenciais administrativas seguras mapeadas no `.env`.
 - **Jest & ts-jest**: Framework de testes unitários. A execução foi otimizada via `isolatedModules`, reduzindo o tempo de inicialização de testes para a escala de milissegundos.
-- **Supertest**: Integrado ao Jest para a execução de testes de integração (E2E), permitindo validar o fluxo completo das rotas HTTP e _Controllers_ sem a necessidade de instanciar portas de rede.
 
 ---
 

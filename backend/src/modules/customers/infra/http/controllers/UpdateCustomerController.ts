@@ -19,6 +19,11 @@ export class UpdateCustomerController {
 
       const updatedCustomer = await useCase.execute(parsedId, data);
 
+      const io = request.app.get("io");
+      if (io) {
+        io.emit("customer_updated");
+      }
+
       return response.status(200).json(updatedCustomer);
     } catch (error: unknown) {
       if (error instanceof Error) {
