@@ -1,7 +1,7 @@
 import { Customer as PrismaCustomer } from "@prisma/client";
-import { prisma } from "../../../shared/infra/database/prisma/client";
-import { Customer } from "../domain/Customer";
-import { ICustomersRepository, CustomersTotalByCity, PaginatedCustomers } from "./ICustomersRepository";
+import { prisma } from "../../../../../shared/infra/database/prisma/client";
+import { Customer } from "../../../domain/Customer";
+import { ICustomersRepository, CustomersTotalByCity, PaginatedCustomers } from "../../../repositories/ICustomersRepository";
 
 export class PrismaCustomersRepository implements ICustomersRepository {
   private mapToDomain(prismaCustomer: PrismaCustomer): Customer {

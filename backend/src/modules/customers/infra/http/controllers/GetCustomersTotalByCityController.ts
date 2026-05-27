@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { GetCustomersTotalByCityUseCase } from "../useCases/GetCustomersTotalByCityUseCase";
-import { PrismaCustomersRepository } from "../repositories/PrismaCustomersRepository";
+import { GetCustomersTotalByCityUseCase } from "../../../useCases/GetCustomersTotalByCityUseCase";
+import { PrismaCustomersRepository } from "../../prisma/repositories/PrismaCustomersRepository";
 
 export class GetCustomersTotalByCityController {
   async handle(request: Request, response: Response): Promise<Response> {

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { LoginUseCase } from "../useCases/LoginUseCase";
+import { LoginUseCase } from "../../../useCases/LoginUseCase";
 
 export class LoginController {
   async handle(request: Request, response: Response): Promise<Response> {

@@ -1,5 +1,5 @@
 import request from "supertest";
-import { app } from "../../../shared/infra/http/app";
+import { app } from "../../../../../shared/infra/http/app";
 
 describe("LoginController", () => {
   beforeEach(() => {

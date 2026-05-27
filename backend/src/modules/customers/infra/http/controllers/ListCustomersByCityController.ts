@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { ListCustomersByCityUseCase } from "../useCases/ListCustomersByCityUseCase";
-import { PrismaCustomersRepository } from "../repositories/PrismaCustomersRepository";
+import { ListCustomersByCityUseCase } from "../../../useCases/ListCustomersByCityUseCase";
+import { PrismaCustomersRepository } from "../../prisma/repositories/PrismaCustomersRepository";
 
 export class ListCustomersByCityController {
   async handle(request: Request, response: Response): Promise<Response> {

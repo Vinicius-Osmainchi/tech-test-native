@@ -1,7 +1,7 @@
 import request from "supertest";
 import jwt from "jsonwebtoken";
-import { app } from "../../../shared/infra/http/app";
-import { prisma } from "../../../shared/infra/database/prisma/client";
+import { app } from "../../../../../shared/infra/http/app";
+import { prisma } from "../../../../../shared/infra/database/prisma/client";
 
 describe("GetCustomersTotalByCityController", () => {
   let token: string;
