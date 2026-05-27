@@ -1,5 +1,5 @@
 import { Customer } from "../../domain/Customer";
-import { ICustomersRepository, CustomersTotalByCity } from "../ICustomersRepository";
+import { ICustomersRepository, CustomersTotalByCity, PaginatedCustomers } from "../ICustomersRepository";
 
 export class InMemoryCustomersRepository implements ICustomersRepository {
   public items: Customer[] = [];
@@ -22,5 +22,17 @@ export class InMemoryCustomersRepository implements ICustomersRepository {
       city,
       customers_total: count,
     }));
+  }
+
+  async findManyByCity(city: string, page: number, limit: number): Promise<PaginatedCustomers> {
+    const filteredCustomers = this.items.filter((item) => item.city === city);
+
+    const skip = (page - 1) * limit;
+    const paginatedCustomers = filteredCustomers.slice(skip, skip + limit);
+
+    return {
+      customers: paginatedCustomers,
+      total: filteredCustomers.length,
+    };
   }
 }

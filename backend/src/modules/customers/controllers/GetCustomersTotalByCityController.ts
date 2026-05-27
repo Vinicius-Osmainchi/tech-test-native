@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { GetCustomersTotalByCityUseCase } from "../GetCustomersTotalByCityUseCase";
+import { GetCustomersTotalByCityUseCase } from "../useCases/GetCustomersTotalByCityUseCase";
 import { PrismaCustomersRepository } from "../repositories/PrismaCustomersRepository";
 
 export class GetCustomersTotalByCityController {

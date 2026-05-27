@@ -1,4 +1,4 @@
-import { CustomersTotalByCity, ICustomersRepository } from "./repositories/ICustomersRepository";
+import { CustomersTotalByCity, ICustomersRepository } from "../repositories/ICustomersRepository";
 
 export class GetCustomersTotalByCityUseCase {
   constructor(private customersRepository: ICustomersRepository) {}

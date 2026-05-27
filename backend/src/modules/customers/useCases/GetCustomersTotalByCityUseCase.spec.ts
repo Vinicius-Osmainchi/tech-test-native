@@ -1,5 +1,5 @@
 import { GetCustomersTotalByCityUseCase } from './GetCustomersTotalByCityUseCase';
-import { InMemoryCustomersRepository } from './repositories/in-memory/InMemoryCustomersRepository';
+import { InMemoryCustomersRepository } from '../repositories/in-memory/InMemoryCustomersRepository';
 
 describe('GetCustomersTotalByCityUseCase', () => {
   let inMemoryCustomersRepository: InMemoryCustomersRepository;
