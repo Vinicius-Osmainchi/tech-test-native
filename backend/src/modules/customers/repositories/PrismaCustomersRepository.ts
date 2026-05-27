@@ -1,7 +1,7 @@
 import { Customer as PrismaCustomer } from "@prisma/client";
 import { prisma } from "../../../shared/infra/database/prisma/client";
 import { Customer } from "../domain/Customer";
-import { ICustomersRepository, CreateCustomerDTO } from "./ICustomersRepository";
+import { ICustomersRepository, CustomersTotalByCity } from "./ICustomersRepository";
 
 export class PrismaCustomersRepository implements ICustomersRepository {
   private mapToDomain(prismaCustomer: PrismaCustomer): Customer {
@@ -17,22 +17,6 @@ export class PrismaCustomersRepository implements ICustomersRepository {
     };
   }
 
-  async create({ firstName, lastName, email, gender, company, city, title }: CreateCustomerDTO): Promise<Customer> {
-    const customer = await prisma.customer.create({
-      data: {
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        gender,
-        company,
-        city,
-        title,
-      },
-    });
-
-    return this.mapToDomain(customer);
-  }
-
   async findByEmail(email: string): Promise<Customer | null> {
     const customer = await prisma.customer.findFirst({
       where: { email },
@@ -41,5 +25,19 @@ export class PrismaCustomersRepository implements ICustomersRepository {
     if (!customer) return null;
 
     return this.mapToDomain(customer);
+  }
+
+  async countByCity(): Promise<CustomersTotalByCity[]> {
+    const result = await prisma.customer.groupBy({
+      by: ["city"],
+      _count: {
+        id: true,
+      },
+    });
+
+    return result.map((item) => ({
+      city: item.city,
+      customers_total: item._count.id,
+    }));
   }
 }

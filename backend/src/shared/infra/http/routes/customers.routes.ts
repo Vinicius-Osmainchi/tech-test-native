@@ -1,8 +1,8 @@
-import { Router } from "express";
-import { CreateCustomerController } from "../../../../modules/customers/controllers/CreateCustomerController";
-import { ensureAuthenticated } from "../middlewares/ensureAuthenticated";
+import { Router } from 'express';
+import { ensureAuthenticated } from '../middlewares/ensureAuthenticated';
+import { GetCustomersTotalByCityController } from '../../../../modules/customers/controllers/GetCustomersTotalByCityController';
 
 export const customersRoutes = Router();
-const createCustomerController = new CreateCustomerController();
+const getCustomersTotalByCityController = new GetCustomersTotalByCityController();
 
-customersRoutes.post("/", ensureAuthenticated, createCustomerController.handle);
+customersRoutes.get('/metrics/by-city', ensureAuthenticated, getCustomersTotalByCityController.handle);
