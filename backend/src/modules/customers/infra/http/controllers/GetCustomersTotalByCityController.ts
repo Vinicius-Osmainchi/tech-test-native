@@ -11,7 +11,7 @@ export class GetCustomersTotalByCityController {
       const result = await useCase.execute();
 
       return response.status(200).json(result);
-    } catch (error) {
+    } catch {
       return response.status(500).json({ error: "Internal server error" });
     }
   }
