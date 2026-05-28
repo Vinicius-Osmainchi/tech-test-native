@@ -5,4 +5,4 @@ import { customersRoutes } from "../../../../modules/customers/infra/http/routes
 export const router = Router();
 
 router.use("/login", authRoutes);
-router.use('/customers', customersRoutes);
+router.use("/customers", customersRoutes);

@@ -39,6 +39,8 @@ describe("UpdateCustomerUseCase", () => {
       { id: 2, firstName: "C", lastName: "D", email: "b@example.com", city: "City" },
     );
 
-    await expect(useCase.execute(1, { email: "b@example.com" })).rejects.toThrow("Email already in use");
+    await expect(useCase.execute(1, { email: "b@example.com" })).rejects.toThrow(
+      "Email already in use",
+    );
   });
 });

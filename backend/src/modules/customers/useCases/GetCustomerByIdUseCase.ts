@@ -3,7 +3,7 @@ import { ICustomersRepository } from "../repositories/ICustomersRepository";
 
 export class GetCustomerByIdUseCase {
   constructor(private customersRepository: ICustomersRepository) {}
- 
+
   async execute(id: number): Promise<Customer> {
     const customer = await this.customersRepository.findById(id);
 

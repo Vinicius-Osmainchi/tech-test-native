@@ -1,7 +1,6 @@
 import { Customer } from "../domain/Customer";
 import { ICustomersRepository, UpdateCustomerDTO } from "../repositories/ICustomersRepository";
 
-
 export class UpdateCustomerUseCase {
   constructor(private customersRepository: ICustomersRepository) {}
 
