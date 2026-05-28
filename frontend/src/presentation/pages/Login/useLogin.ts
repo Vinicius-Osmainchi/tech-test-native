@@ -8,6 +8,11 @@ interface LoginFormData {
   password: string;
 }
 
+const errorMapper: Record<string, string> = {
+  "Invalid credentials": "Email ou senha incorretos.",
+  default: "Falha ao comunicar com o servidor. Tente novamente mais tarde.",
+};
+
 export const useLogin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,9 +28,10 @@ export const useLogin = () => {
       navigate("/dashboard");
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.error) {
-        setError(err.response.data.error);
+        const backendError = err.response.data.error;
+        setError(errorMapper[backendError] || errorMapper["default"]);
       } else {
-        setError("Falha ao comunicar com o servidor.");
+        setError(errorMapper["default"]);
       }
     } finally {
       setLoading(false);

@@ -19,7 +19,7 @@ describe('LoginUseCase', () => {
 
   it('should be able to generate a token with valid credentials', async () => {
     const result = await loginUseCase.execute({
-      email: 'admin@admin.com',
+      email: 'admin@email.com',
       password: 'admin'
     });
 
@@ -43,7 +43,7 @@ describe('LoginUseCase', () => {
     delete process.env.JWT_SECRET;
 
     await expect(
-      loginUseCase.execute({ email: 'admin@admin.com', password: 'admin' })
+      loginUseCase.execute({ email: 'admin@email.com', password: 'admin' })
     ).rejects.toThrow('JWT_SECRET is not defined');
   });
 });
