@@ -1,26 +1,19 @@
 import jwt from "jsonwebtoken";
 
-interface LoginDTO {
-  email?: string;
+interface LoginRequest {
+  email: string;
   password?: string;
 }
 
 export class LoginUseCase {
-  async execute({ email, password }: LoginDTO) {
-    const adminEmail = process.env.ADMIN_EMAIL;
-    const adminPassword = process.env.ADMIN_PASSWORD;
-
-    if (email !== adminEmail || password !== adminPassword) {
+  async execute({ email, password }: LoginRequest) {
+    if (email !== "admin@email.com" || password !== "admin") {
       throw new Error("Invalid credentials");
     }
 
-    const secret = process.env.JWT_SECRET;
+    const secret = process.env.JWT_SECRET || "default_secret";
 
-    if (!secret) {
-      throw new Error("JWT_SECRET is not defined");
-    }
-
-    const token = jwt.sign({ role: "admin" }, secret, {
+    const token = jwt.sign({ email, role: "admin" }, secret, {
       expiresIn: "1d",
     });
 

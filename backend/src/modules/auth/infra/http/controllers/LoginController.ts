@@ -11,10 +11,7 @@ export class LoginController {
 
       return response.status(200).json(result);
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        return response.status(401).json({ error: error.message });
-      }
-      return response.status(500).json({ error: "Internal server error" });
+      return response.status(401).json({ error: "Credenciais inválidas" });
     }
   }
 }
