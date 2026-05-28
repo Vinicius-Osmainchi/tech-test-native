@@ -20,7 +20,7 @@ export function ensureAuthenticated(
     jwt.verify(token, secret);
 
     next();
-  } catch (err) {
+  } catch {
     response.status(401).json({ error: "Token invalid" });
     return;
   }

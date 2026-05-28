@@ -10,7 +10,7 @@ export class LoginController {
       const result = await loginUseCase.execute({ email, password });
 
       return response.status(200).json(result);
-    } catch (error: unknown) {
+    } catch {
       return response.status(401).json({ error: "Credenciais inválidas" });
     }
   }
