@@ -1,17 +1,30 @@
-import { PrismaClient } from '@prisma/client';
-import fs from 'fs';
-import path from 'path';
+import { PrismaClient } from "@prisma/client";
+import * as fs from "fs";
+import * as path from "path";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const filePath = path.join(__dirname, 'customers.json');
-  const rawData = fs.readFileSync(filePath, 'utf-8');
-  const customers = JSON.parse(rawData);
+  const filePath = path.join(__dirname, "customers.json");
+  const rawData = fs.readFileSync(filePath, "utf-8");
+  const customersData = JSON.parse(rawData);
 
-  for (const customer of customers) {
+  const uniqueCities = [...new Set(customersData.map((c: any) => c.city))];
+
+  for (const cityName of uniqueCities) {
+    await prisma.city.upsert({
+      where: { name: cityName as string },
+      update: {},
+      create: { name: cityName as string },
+    });
+  }
+
+  const citiesInDb = await prisma.city.findMany();
+  const cityMap = new Map(citiesInDb.map((c) => [c.name, c.id]));
+
+  for (const customer of customersData) {
     await prisma.customer.upsert({
-      where: { id: customer.id },
+      where: { email: customer.email },
       update: {},
       create: {
         id: customer.id,
@@ -20,8 +33,8 @@ async function main() {
         email: customer.email,
         gender: customer.gender,
         company: customer.company,
-        city: customer.city,
         title: customer.title,
+        city_id: cityMap.get(customer.city) as number,
       },
     });
   }

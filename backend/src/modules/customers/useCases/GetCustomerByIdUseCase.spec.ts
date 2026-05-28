@@ -1,32 +1,47 @@
-import { InMemoryCustomersRepository } from "../repositories/in-memory/InMemoryCustomersRepository";
 import { GetCustomerByIdUseCase } from "./GetCustomerByIdUseCase";
+import { prisma } from "../../../shared/infra/database/prisma/client";
+
+jest.mock("../../../shared/infra/database/prisma/client", () => ({
+  prisma: {
+    customer: { findUnique: jest.fn() },
+  },
+}));
 
 describe("GetCustomerByIdUseCase", () => {
-  let inMemoryCustomersRepository: InMemoryCustomersRepository;
-  let useCase: GetCustomerByIdUseCase;
-
-  beforeEach(() => {
-    inMemoryCustomersRepository = new InMemoryCustomersRepository();
-    useCase = new GetCustomerByIdUseCase(inMemoryCustomersRepository);
-  });
-
-  it("should be able to get a customer by id", async () => {
-    inMemoryCustomersRepository.items.push({
+  it("should return the customer details by ID", async () => {
+    const mockCustomer = {
       id: 1,
-      firstName: "John",
-      lastName: "Doe",
-      email: "john@example.com",
-      city: "Test City",
+      first_name: "Laura",
+      last_name: "Richards",
+      email: "lrichards0@reverbnation.com",
+      gender: "Female",
+      company: "Meezzy",
+      title: "Biostatistician III",
+      city_id: 1,
+      city: { id: 1, name: "Warner, NH" },
+    };
+
+    (prisma.customer.findUnique as jest.Mock).mockResolvedValue(mockCustomer);
+
+    const useCase = new GetCustomerByIdUseCase();
+    const result = await useCase.execute(1);
+
+    expect(result).toEqual({
+      id: 1,
+      first_name: "Laura",
+      last_name: "Richards",
+      email: "lrichards0@reverbnation.com",
+      gender: "Female",
+      company: "Meezzy",
+      title: "Biostatistician III",
+      city: "Warner, NH",
     });
-
-    const customer = await useCase.execute(1);
-
-    expect(customer).toHaveProperty("id");
-    expect(customer.id).toBe(1);
-    expect(customer.firstName).toBe("John");
   });
 
-  it("should not be able to get a non-existing customer", async () => {
+  it("should throw an error if the customer is not found", async () => {
+    (prisma.customer.findUnique as jest.Mock).mockResolvedValue(null);
+    const useCase = new GetCustomerByIdUseCase();
+
     await expect(useCase.execute(999)).rejects.toThrow("Customer not found");
   });
 });

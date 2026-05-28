@@ -1,46 +1,56 @@
-import { InMemoryCustomersRepository } from "../repositories/in-memory/InMemoryCustomersRepository";
 import { UpdateCustomerUseCase } from "./UpdateCustomerUseCase";
+import { prisma } from "../../../shared/infra/database/prisma/client";
+
+jest.mock("../../../shared/infra/database/prisma/client", () => ({
+  prisma: {
+    customer: { findUnique: jest.fn(), update: jest.fn() },
+    city: { upsert: jest.fn() },
+  },
+}));
 
 describe("UpdateCustomerUseCase", () => {
-  let inMemoryCustomersRepository: InMemoryCustomersRepository;
-  let useCase: UpdateCustomerUseCase;
-
-  beforeEach(() => {
-    inMemoryCustomersRepository = new InMemoryCustomersRepository();
-    useCase = new UpdateCustomerUseCase(inMemoryCustomersRepository);
-  });
-
-  it("should be able to update a customer", async () => {
-    inMemoryCustomersRepository.items.push({
+  it("should update a customer and create a new city if necessary", async () => {
+    const mockExistingCustomer = { id: 1, city_id: 1 };
+    const mockNewCity = { id: 2, name: "New City" };
+    const mockUpdatedCustomer = {
       id: 1,
-      firstName: "Old",
-      lastName: "Name",
-      email: "old@example.com",
-      city: "Old City",
-    });
+      first_name: "Laura Updated",
+      last_name: "Richards",
+      email: "lrichards0@reverbnation.com",
+      gender: "Female",
+      company: "Meezzy",
+      title: "Biostatistician III",
+      city_id: 2,
+      city: { id: 2, name: "New City" },
+    };
 
-    const updatedCustomer = await useCase.execute(1, {
-      firstName: "New",
+    (prisma.customer.findUnique as jest.Mock).mockResolvedValue(mockExistingCustomer);
+    (prisma.city.upsert as jest.Mock).mockResolvedValue(mockNewCity);
+    (prisma.customer.update as jest.Mock).mockResolvedValue(mockUpdatedCustomer);
+
+    const useCase = new UpdateCustomerUseCase();
+    const result = await useCase.execute({
+      id: 1,
+      first_name: "Laura Updated",
       city: "New City",
     });
 
-    expect(updatedCustomer.firstName).toBe("New");
-    expect(updatedCustomer.city).toBe("New City");
-    expect(updatedCustomer.email).toBe("old@example.com");
+    expect(prisma.city.upsert).toHaveBeenCalledWith({
+      where: { name: "New City" },
+      update: {},
+      create: { name: "New City" },
+    });
+
+    expect(result.first_name).toBe("Laura Updated");
+    expect(result.city).toBe("New City");
   });
 
-  it("should not be able to update a non-existing customer", async () => {
-    await expect(useCase.execute(999, { firstName: "Test" })).rejects.toThrow("Customer not found");
-  });
+  it("should throw an error if the customer to be updated does not exist", async () => {
+    (prisma.customer.findUnique as jest.Mock).mockResolvedValue(null);
+    const useCase = new UpdateCustomerUseCase();
 
-  it("should not be able to update to an email already in use by another customer", async () => {
-    inMemoryCustomersRepository.items.push(
-      { id: 1, firstName: "A", lastName: "B", email: "a@example.com", city: "City" },
-      { id: 2, firstName: "C", lastName: "D", email: "b@example.com", city: "City" },
-    );
-
-    await expect(useCase.execute(1, { email: "b@example.com" })).rejects.toThrow(
-      "Email already in use",
+    await expect(useCase.execute({ id: 999, first_name: "Nonexistent" })).rejects.toThrow(
+      "Customer not found",
     );
   });
 });

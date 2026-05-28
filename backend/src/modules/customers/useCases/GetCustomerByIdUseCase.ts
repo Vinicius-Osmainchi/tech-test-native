@@ -1,16 +1,23 @@
-import { Customer } from "../domain/Customer";
-import { ICustomersRepository } from "../repositories/ICustomersRepository";
+import { prisma } from "../../../shared/infra/database/prisma/client";
 
 export class GetCustomerByIdUseCase {
-  constructor(private customersRepository: ICustomersRepository) {}
-
-  async execute(id: number): Promise<Customer> {
-    const customer = await this.customersRepository.findById(id);
+  async execute(id: number) {
+    const customer = await prisma.customer.findUnique({
+      where: { id },
+      include: {
+        city: true,
+      },
+    });
 
     if (!customer) {
       throw new Error("Customer not found");
     }
 
-    return customer;
+    const { city_id, city, ...rest } = customer;
+
+    return {
+      ...rest,
+      city: city.name,
+    };
   }
 }

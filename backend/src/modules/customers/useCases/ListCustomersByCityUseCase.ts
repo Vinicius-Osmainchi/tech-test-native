@@ -1,19 +1,24 @@
-import { ICustomersRepository, PaginatedCustomers } from "../repositories/ICustomersRepository";
-
-interface Request {
-  city: string;
-  page?: number;
-  limit?: number;
-}
+import { prisma } from "../../../shared/infra/database/prisma/client";
 
 export class ListCustomersByCityUseCase {
-  constructor(private customersRepository: ICustomersRepository) {}
+  async execute(cityName: string) {
+    const customers = await prisma.customer.findMany({
+      where: {
+        city: {
+          name: cityName,
+        },
+      },
+      include: {
+        city: true,
+      },
+    });
 
-  async execute({ city, page = 1, limit = 10 }: Request): Promise<PaginatedCustomers> {
-    if (!city || city.trim() === "") {
-      throw new Error("City is required");
-    }
-
-    return this.customersRepository.findManyByCity(city, page, limit);
+    return customers.map((customer) => {
+      const { city_id, city, ...rest } = customer;
+      return {
+        ...rest,
+        city: city.name,
+      };
+    });
   }
 }

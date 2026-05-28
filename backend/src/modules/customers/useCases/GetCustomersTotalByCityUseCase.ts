@@ -1,9 +1,21 @@
-import { CustomersTotalByCity, ICustomersRepository } from "../repositories/ICustomersRepository";
+import { prisma } from "../../../shared/infra/database/prisma/client";
 
 export class GetCustomersTotalByCityUseCase {
-  constructor(private customersRepository: ICustomersRepository) {}
+  async execute() {
+    const cities = await prisma.city.findMany({
+      select: {
+        name: true,
+        _count: {
+          select: {
+            customers: true,
+          },
+        },
+      },
+    });
 
-  async execute(): Promise<CustomersTotalByCity[]> {
-    return this.customersRepository.countByCity();
+    return cities.map((city: { name: string; _count: { customers: number } }) => ({
+      city: city.name,
+      customers_total: city._count.customers,
+    }));
   }
 }
