@@ -1,23 +1,14 @@
 import { Request, Response } from "express";
 import { UpdateCustomerUseCase } from "../../../useCases/UpdateCustomerUseCase";
-import { PrismaCustomersRepository } from "../../prisma/repositories/PrismaCustomersRepository";
 
 export class UpdateCustomerController {
   async handle(request: Request, response: Response): Promise<Response> {
-    const { id } = request.params;
     const data = request.body;
 
     try {
-      const customersRepository = new PrismaCustomersRepository();
-      const useCase = new UpdateCustomerUseCase(customersRepository);
+      const useCase = new UpdateCustomerUseCase();
 
-      const parsedId = parseInt(String(id), 10);
-
-      if (isNaN(parsedId)) {
-        return response.status(400).json({ error: "Invalid ID format" });
-      }
-
-      const updatedCustomer = await useCase.execute(parsedId, data);
+      const updatedCustomer = await useCase.execute(data);
 
       const io = request.app.get("io");
       if (io) {

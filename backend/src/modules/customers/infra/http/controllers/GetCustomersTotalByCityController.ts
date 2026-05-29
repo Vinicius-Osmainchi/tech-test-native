@@ -1,12 +1,10 @@
 import { Request, Response } from "express";
 import { GetCustomersTotalByCityUseCase } from "../../../useCases/GetCustomersTotalByCityUseCase";
-import { PrismaCustomersRepository } from "../../prisma/repositories/PrismaCustomersRepository";
 
 export class GetCustomersTotalByCityController {
   async handle(request: Request, response: Response): Promise<Response> {
     try {
-      const customersRepository = new PrismaCustomersRepository();
-      const useCase = new GetCustomersTotalByCityUseCase(customersRepository);
+      const useCase = new GetCustomersTotalByCityUseCase();
 
       const result = await useCase.execute();
 

@@ -1,24 +1,16 @@
 import { Request, Response } from "express";
 import { ListCustomersByCityUseCase } from "../../../useCases/ListCustomersByCityUseCase";
-import { PrismaCustomersRepository } from "../../prisma/repositories/PrismaCustomersRepository";
 
 export class ListCustomersByCityController {
   async handle(request: Request, response: Response): Promise<Response> {
-    const { city, page, limit } = request.query;
+    const { city } = request.query;
 
     try {
-      const customersRepository = new PrismaCustomersRepository();
-      const useCase = new ListCustomersByCityUseCase(customersRepository);
+      const useCase = new ListCustomersByCityUseCase();
 
-      const parsedPage = page ? parseInt(String(page), 10) : 1;
-      const parsedLimit = limit ? parseInt(String(limit), 10) : 10;
       const cityValue = city ? String(city) : "";
 
-      const result = await useCase.execute({
-        city: cityValue,
-        page: parsedPage,
-        limit: parsedLimit,
-      });
+      const result = await useCase.execute(cityValue);
 
       return response.status(200).json(result);
     } catch (error: unknown) {

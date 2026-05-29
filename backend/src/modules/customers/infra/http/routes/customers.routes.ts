@@ -12,7 +12,7 @@ const getCustomerByIdController = new GetCustomerByIdController();
 const updateCustomerController = new UpdateCustomerController();
 
 customersRoutes.get(
-  "/metrics/by-city",
+  "/totals-by-city",
   ensureAuthenticated,
   getCustomersTotalByCityController.handle,
 );

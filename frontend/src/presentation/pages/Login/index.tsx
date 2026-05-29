@@ -13,7 +13,11 @@ export function Login() {
           Native Tech Test
         </Title>
 
-        {error && <Alert title={error} type="error" showIcon className="mb-4" />}
+        {error && (
+          <div className="mb-4">
+            <Alert title={error} type="error" showIcon />
+          </div>
+        )}
 
         <Form name="login" onFinish={handleLogin} layout="vertical" size="large">
           <Form.Item
@@ -26,7 +30,10 @@ export function Login() {
             <Input placeholder="Digite seu email" />
           </Form.Item>
 
-          <Form.Item name="password" rules={[{ required: true, message: "Por favor, insira a senha!" }]}>
+          <Form.Item
+            name="password"
+            rules={[{ required: true, message: "Por favor, insira a senha!" }]}
+          >
             <Input.Password placeholder="Digite sua senha" />
           </Form.Item>
 

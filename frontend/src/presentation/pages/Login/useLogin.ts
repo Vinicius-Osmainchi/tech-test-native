@@ -8,11 +8,6 @@ interface LoginFormData {
   password: string;
 }
 
-const errorMapper: Record<string, string> = {
-  "Invalid credentials": "Email ou senha incorretos.",
-  default: "Falha ao comunicar com o servidor. Tente novamente mais tarde.",
-};
-
 export const useLogin = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +16,7 @@ export const useLogin = () => {
   const handleLogin = async (values: LoginFormData) => {
     setLoading(true);
     setError(null);
+    const defaultErrorMessage = "Ocorreu um erro durante o login. Por favor, tente novamente.";
 
     try {
       const response = await AuthService.login(values.email, values.password);
@@ -29,9 +25,9 @@ export const useLogin = () => {
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.error) {
         const backendError = err.response.data.error;
-        setError(errorMapper[backendError] || errorMapper["default"]);
+        setError(backendError);
       } else {
-        setError(errorMapper["default"]);
+        setError(defaultErrorMessage);
       }
     } finally {
       setLoading(false);

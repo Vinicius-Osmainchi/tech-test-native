@@ -1,14 +1,12 @@
 import { Request, Response } from "express";
 import { GetCustomerByIdUseCase } from "../../../useCases/GetCustomerByIdUseCase";
-import { PrismaCustomersRepository } from "../../prisma/repositories/PrismaCustomersRepository";
 
 export class GetCustomerByIdController {
   async handle(request: Request, response: Response): Promise<Response> {
     const { id } = request.params;
 
     try {
-      const customersRepository = new PrismaCustomersRepository();
-      const useCase = new GetCustomerByIdUseCase(customersRepository);
+      const useCase = new GetCustomerByIdUseCase();
 
       const parsedId = parseInt(String(id), 10);
 
