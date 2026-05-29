@@ -3,7 +3,10 @@ import { prisma } from "../../../shared/infra/database/prisma/client";
 
 jest.mock("../../../shared/infra/database/prisma/client", () => ({
   prisma: {
-    customer: { findMany: jest.fn() },
+    customer: {
+      findMany: jest.fn(),
+      count: jest.fn(),
+    },
   },
 }));
 
@@ -19,31 +22,28 @@ describe("ListCustomersByCityUseCase", () => {
         company: "Meezzy",
         title: "Biostatistician III",
         city_id: 1,
-        city: { id: 1, name: "Warner, NH" },
       },
     ];
 
     (prisma.customer.findMany as jest.Mock).mockResolvedValue(mockCustomers);
+    (prisma.customer.count as jest.Mock).mockResolvedValue(1);
 
     const useCase = new ListCustomersByCityUseCase();
-    const result = await useCase.execute("Warner, NH");
+    const result = await useCase.execute("Warner, NH", 1, 10);
 
     expect(prisma.customer.findMany).toHaveBeenCalledWith({
       where: { city: { name: "Warner, NH" } },
-      include: { city: true },
+      skip: 0,
+      take: 10,
     });
 
-    expect(result).toEqual([
-      {
-        id: 1,
-        first_name: "Laura",
-        last_name: "Richards",
-        email: "lrichards0@reverbnation.com",
-        gender: "Female",
-        company: "Meezzy",
-        title: "Biostatistician III",
-        city: "Warner, NH",
-      },
-    ]);
+    expect(prisma.customer.count).toHaveBeenCalledWith({
+      where: { city: { name: "Warner, NH" } },
+    });
+
+    expect(result).toEqual({
+      customers: mockCustomers,
+      total: 1,
+    });
   });
 });

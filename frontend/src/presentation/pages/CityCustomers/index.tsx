@@ -6,7 +6,8 @@ import { useCityCustomers } from "./useCityCustomers";
 export function CityCustomers() {
   const { cityName } = useParams<{ cityName: string }>();
   const navigate = useNavigate();
-  const { data, loading, error } = useCityCustomers(cityName);
+  const { data, total, loading, error, currentPage, pageSize, handlePageChange } =
+    useCityCustomers(cityName);
 
   const columns = [
     { title: "ID", dataIndex: "id", key: "id", width: 80 },
@@ -38,7 +39,10 @@ export function CityCustomers() {
         rowKey="id"
         loading={loading}
         pagination={{
-          pageSize: 10,
+          current: currentPage,
+          pageSize: pageSize,
+          total: total,
+          onChange: handlePageChange,
           showSizeChanger: false,
         }}
         className="shadow-sm border border-gray-100 rounded-lg"

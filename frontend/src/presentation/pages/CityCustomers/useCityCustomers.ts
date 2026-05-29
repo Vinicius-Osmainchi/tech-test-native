@@ -4,8 +4,12 @@ import { socket } from "../../../data/services/socket";
 
 export const useCityCustomers = (cityName: string | undefined) => {
   const [data, setData] = useState<Customer[]>([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   const fetchCustomers = useCallback(() => {
     if (!cityName) {
@@ -15,10 +19,11 @@ export const useCityCustomers = (cityName: string | undefined) => {
 
     let isMounted = true;
 
-    CustomerService.getCustomersByCity(cityName)
+    CustomerService.getCustomersByCity(cityName, currentPage, pageSize)
       .then((response) => {
         if (isMounted) {
-          setData(response);
+          setData(response.customers);
+          setTotal(response.total);
           setError(null);
         }
       })
@@ -36,7 +41,7 @@ export const useCityCustomers = (cityName: string | undefined) => {
     return () => {
       isMounted = false;
     };
-  }, [cityName]);
+  }, [cityName, currentPage, pageSize]);
 
   useEffect(() => {
     fetchCustomers();
@@ -50,9 +55,17 @@ export const useCityCustomers = (cityName: string | undefined) => {
     };
   }, [fetchCustomers]);
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   return {
     data,
+    total,
     loading,
     error,
+    currentPage,
+    pageSize,
+    handlePageChange,
   };
 };

@@ -16,15 +16,24 @@ export interface CityTotal {
   customers_total: number;
 }
 
+export interface PaginatedResponse {
+  customers: Customer[];
+  total: number;
+}
+
 export const CustomerService = {
   getTotalsByCity: async (): Promise<CityTotal[]> => {
     const response = await api.get<CityTotal[]>("/customers/totals-by-city");
     return response.data;
   },
 
-  getCustomersByCity: async (city: string): Promise<Customer[]> => {
-    const response = await api.get<Customer[]>("/customers", {
-      params: { city },
+  getCustomersByCity: async (
+    city: string,
+    page: number,
+    limit: number,
+  ): Promise<PaginatedResponse> => {
+    const response = await api.get<PaginatedResponse>("/customers", {
+      params: { city, page, limit },
     });
     return response.data;
   },

@@ -3,14 +3,16 @@ import { ListCustomersByCityUseCase } from "../../../useCases/ListCustomersByCit
 
 export class ListCustomersByCityController {
   async handle(request: Request, response: Response): Promise<Response> {
-    const { city } = request.query;
+    const { city, page = 1, limit = 10 } = request.query;
 
     try {
       const useCase = new ListCustomersByCityUseCase();
 
       const cityValue = city ? String(city) : "";
+      const pageValue = parseInt(String(page), 10);
+      const limitValue = parseInt(String(limit), 10);
 
-      const result = await useCase.execute(cityValue);
+      const result = await useCase.execute(cityValue, pageValue, limitValue);
 
       return response.status(200).json(result);
     } catch (error: unknown) {

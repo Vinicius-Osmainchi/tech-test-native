@@ -1,24 +1,31 @@
 import { prisma } from "../../../shared/infra/database/prisma/client";
 
 export class ListCustomersByCityUseCase {
-  async execute(cityName: string) {
-    const customers = await prisma.customer.findMany({
-      where: {
-        city: {
-          name: cityName,
-        },
-      },
-      include: {
-        city: true,
-      },
-    });
+  async execute(cityName: string, page: number, limit: number) {
+    const skip = (page - 1) * limit;
 
-    return customers.map((customer) => {
-      const { city_id, city, ...rest } = customer;
-      return {
-        ...rest,
-        city: city.name,
-      };
-    });
+    const [customers, total] = await Promise.all([
+      prisma.customer.findMany({
+        where: {
+          city: {
+            name: cityName,
+          },
+        },
+        skip,
+        take: limit,
+      }),
+      prisma.customer.count({
+        where: {
+          city: {
+            name: cityName,
+          },
+        },
+      }),
+    ]);
+
+    return {
+      customers,
+      total,
+    };
   }
 }
