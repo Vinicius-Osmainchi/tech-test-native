@@ -37,4 +37,13 @@ export const CustomerService = {
     });
     return response.data;
   },
+  getCustomerById: async (id: number): Promise<Customer> => {
+    const response = await api.get<Customer>(`/customers/${id}`);
+    return response.data;
+  },
+
+  updateCustomer: async (id: number, data: Partial<Customer>): Promise<Customer> => {
+    const response = await api.put<Customer>(`/customers/${id}`, data);
+    return response.data;
+  },
 };

@@ -26,5 +26,6 @@ model Customer {
   city_id    Int
   city       City   @relation(fields: [city_id], references: [id])
 
+  @@index([city_id])
   @@map("customers")
 }

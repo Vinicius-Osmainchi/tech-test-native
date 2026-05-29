@@ -38,6 +38,10 @@ export function CityCustomers() {
         columns={columns}
         rowKey="id"
         loading={loading}
+        onRow={(record) => ({
+          onClick: () => navigate(`/customer/${record.id}`),
+          className: "cursor-pointer hover:bg-gray-50",
+        })}
         pagination={{
           current: currentPage,
           pageSize: pageSize,
