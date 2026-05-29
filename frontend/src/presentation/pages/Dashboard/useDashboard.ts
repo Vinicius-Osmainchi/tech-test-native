@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
-import { CustomerService, type CityTotal } from "../../../data/services/CustomerService";
+import { useEffect, useState, useCallback } from "react";
+import { type CityTotal, CustomerService } from "../../../data/services/CustomerService";
+import { socket } from "../../../data/services/socket";
 
 export const useDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<CityTotal[]>([]);
 
-  useEffect(() => {
+  const fetchDashboardData = useCallback(() => {
     let isMounted = true;
 
     CustomerService.getTotalsByCity()
@@ -32,17 +33,21 @@ export const useDashboard = () => {
     };
   }, []);
 
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  useEffect(() => {
+    socket.on("customer_updated", fetchDashboardData);
+
+    return () => {
+      socket.off("customer_updated", fetchDashboardData);
+    };
+  }, [fetchDashboardData]);
+
   const reload = async () => {
     setLoading(true);
-    try {
-      const totals = await CustomerService.getTotalsByCity();
-      setData(totals);
-      setError(null);
-    } catch {
-      setError("Não foi possível carregar os dados do dashboard.");
-    } finally {
-      setLoading(false);
-    }
+    fetchDashboardData();
   };
 
   return { loading, error, data, reload };

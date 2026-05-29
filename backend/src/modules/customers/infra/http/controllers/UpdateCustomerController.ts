@@ -3,12 +3,19 @@ import { UpdateCustomerUseCase } from "../../../useCases/UpdateCustomerUseCase";
 
 export class UpdateCustomerController {
   async handle(request: Request, response: Response): Promise<Response> {
+    const { id } = request.params;
     const data = request.body;
 
     try {
       const useCase = new UpdateCustomerUseCase();
 
-      const updatedCustomer = await useCase.execute(data);
+      const parsedId = parseInt(String(id), 10);
+
+      if (isNaN(parsedId)) {
+        return response.status(400).json({ error: "Invalid ID format" });
+      }
+
+      const updatedCustomer = await useCase.execute({ id: parsedId, ...data });
 
       const io = request.app.get("io");
       if (io) {
