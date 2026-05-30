@@ -47,8 +47,12 @@ Cada use case concentra a lógica de negócio. Controllers são finos: validam e
 
 **Modelos principais:**
 
-- `City` — nome único da cidade
+- `City` — nome único da cidade (entidade de agrupamento usada no dashboard e nas listagens)
 - `Customer` — dados do cliente, relacionado a `City` via `city_id`
+
+**Por que `company` e `title` ficam em `Customer`?**
+
+Cidade foi normalizada porque é eixo central do produto (cards, filtros, rotas). Empresa e cargo são atributos descritivos do cliente — não há agrupamento, relatório ou CRUD por empresa/cargo no escopo. Tabelas `companies` / `titles` adicionariam joins e complexidade no seed sem ganho funcional para este teste (overengineering).
 
 **Seed:** `prisma/seed.ts` lê `prisma/customers.json` e popula as tabelas.
 
@@ -112,6 +116,23 @@ npm run dev
 ```
 
 A API ficará disponível em http://localhost:3000
+
+---
+
+## Documentação da API (Swagger)
+
+Interface interativa disponível em:
+
+| Ambiente | URL |
+|----------|-----|
+| Local | http://localhost:3000/docs |
+| Docker | http://localhost:8080/docs |
+
+Spec OpenAPI em JSON: `/docs/openapi.json`
+
+No Swagger UI, use **Authorize** com o token obtido em `POST /login` (`Bearer <token>`).
+
+As requisições usam automaticamente o mesmo host do Swagger (ex.: `http://localhost:8080` no Docker). Não selecione `localhost:3000` no Docker — o backend não é exposto nessa porta.
 
 ---
 

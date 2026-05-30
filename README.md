@@ -52,7 +52,9 @@ Aguarde os containers iniciarem e acesse:
 | Email | `admin@email.com` |
 | Senha | `admin` |
 
-O frontend (Nginx) serve o dashboard e faz proxy das rotas `/login`, `/customers` e `/socket.io` para o backend. Não é necessário rodar nada manualmente.
+O frontend (Nginx) serve o dashboard e faz proxy das rotas `/login`, `/customers`, `/docs` e `/socket.io` para o backend. Não é necessário rodar nada manualmente.
+
+**Documentação da API (Swagger):** http://localhost:8080/docs
 
 **Alterações no código:** o container do frontend serve arquivos estáticos gerados no build. Mudanças no frontend **não aparecem automaticamente** — é preciso rebuildar:
 
@@ -147,9 +149,20 @@ No frontend, faça login em `/login` com as mesmas credenciais. O token é armaz
 
 ---
 
+## Modelagem do banco
+
+- **`cities`** — normalizada (agrupamento e navegação por cidade no dashboard)
+- **`customers`** — `company` e `title` como colunas de texto (atributos do cliente, sem tabelas separadas)
+
+Empresa e cargo não foram extraídos para tabelas próprias: não há requisito de agrupar ou filtrar por eles, e o volume de dados do teste não justifica joins extras.
+
+---
+
 ## Endpoints da API
 
 Via Docker, as rotas da API são acessíveis pelo mesmo host do frontend (`http://localhost:8080`). Em desenvolvimento local, a API responde diretamente em `http://localhost:3000`.
+
+Documentação interativa: **http://localhost:8080/docs** (Docker) ou **http://localhost:3000/docs** (local).
 
 | Método | Rota | Descrição |
 |--------|------|-----------|

@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
+      "/docs": "http://localhost:3000",
       "/login": "http://localhost:3000",
       "/customers": "http://localhost:3000",
       "/socket.io": {
