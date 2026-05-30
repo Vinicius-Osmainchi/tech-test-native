@@ -9,9 +9,12 @@ export interface Customer {
   title: string;
 }
 
-export type UpdateCustomerData = Partial<Omit<Customer, "id">> & { id: number };
-
 export interface CityTotal {
   city: string;
   customers_total: number;
+}
+
+export interface PaginatedCustomers {
+  customers: Customer[];
+  total: number;
 }

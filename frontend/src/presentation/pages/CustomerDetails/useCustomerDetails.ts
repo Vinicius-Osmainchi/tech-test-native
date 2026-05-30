@@ -60,6 +60,7 @@ export const useCustomerDetails = (id: string | undefined) => {
       }, 1500);
     } catch {
       setError("Erro ao atualizar o cliente.");
+    } finally {
       setSaving(false);
     }
   };

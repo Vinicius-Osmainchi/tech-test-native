@@ -1,20 +1,21 @@
 import { Request, Response } from "express";
 import { UpdateCustomerUseCase } from "../../../useCases/UpdateCustomerUseCase";
+import { AppError } from "../../../../../shared/errors/AppError";
 
 export class UpdateCustomerController {
   async handle(request: Request, response: Response): Promise<Response> {
     const { id } = request.params;
     const data = request.body;
 
+    const parsedId = parseInt(String(id), 10);
+
+    if (isNaN(parsedId)) {
+      throw new AppError("Invalid ID format");
+    }
+
+    const useCase = new UpdateCustomerUseCase();
+
     try {
-      const useCase = new UpdateCustomerUseCase();
-
-      const parsedId = parseInt(String(id), 10);
-
-      if (isNaN(parsedId)) {
-        return response.status(400).json({ error: "Invalid ID format" });
-      }
-
       const updatedCustomer = await useCase.execute({ id: parsedId, ...data });
 
       const io = request.app.get("io");
@@ -24,13 +25,10 @@ export class UpdateCustomerController {
 
       return response.status(200).json(updatedCustomer);
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        if (error.message === "Customer not found") {
-          return response.status(404).json({ error: error.message });
-        }
-        return response.status(400).json({ error: error.message });
+      if (error instanceof Error && error.message === "Customer not found") {
+        throw new AppError(error.message, 404);
       }
-      return response.status(500).json({ error: "Internal server error" });
+      throw new AppError("Error updating customer");
     }
   }
 }

@@ -29,7 +29,7 @@ export function CityCustomers() {
 
       {error && (
         <div className="mb-6">
-          <Alert message={error} type="error" showIcon />
+          <Alert title={error} type="error" showIcon />
         </div>
       )}
 

@@ -1,73 +1,127 @@
-# React + TypeScript + Vite
+# Frontend — Tech Test Native
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Dashboard em **React** e **TypeScript** para visualizar clientes por cidade, navegar listagens paginadas e editar detalhes, com atualização em tempo real via WebSocket.
 
-Currently, two official plugins are available:
+Para executar o projeto completo com um comando, consulte o [README da raiz](../README.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## Tecnologias
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Tecnologia | Uso |
+|------------|-----|
+| React 19 | UI |
+| Vite 8 | Build e dev server |
+| React Router 7 | Navegação |
+| Ant Design 6 | Componentes (cards, tabela, formulário) |
+| Tailwind CSS 4 | Estilização utilitária |
+| Axios | Requisições HTTP |
+| Socket.IO Client | Atualização do dashboard em tempo real |
+| Nginx | Servidor estático e proxy reverso (Docker) |
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Arquitetura
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── data/
+│   └── services/       # Comunicação com API e WebSocket
+│       ├── api.ts          # Instância Axios + interceptor JWT
+│       ├── AuthService.ts
+│       ├── CustomerService.ts
+│       └── socket.ts
+├── domain/
+│   └── models/         # Tipos compartilhados (ex.: AuthToken)
+└── presentation/
+    ├── components/     # AuthGuard e componentes reutilizáveis
+    ├── pages/          # Telas + hooks de cada página
+    └── routes/         # Definição de rotas
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Cada página segue o padrão **componente + hook** (`index.tsx` + `use*.ts`), separando UI da lógica de dados.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Páginas e rotas
+
+| Rota | Componente | Descrição |
+|------|------------|-----------|
+| `/login` | `Login` | Autenticação com JWT |
+| `/dashboard` | `Dashboard` | Cards clicáveis com total de clientes por cidade |
+| `/city/:cityName` | `CityCustomers` | Tabela paginada; clique na linha abre detalhes |
+| `/customer/:id` | `CustomerDetails` | Formulário de edição do cliente |
+
+Rotas protegidas passam pelo `AuthGuard`, que redireciona para `/login` se não houver token em `localStorage` (`@TechTest:token`).
+
+---
+
+## Integração com a API
+
+As requisições usam URLs relativas (`baseURL` vazio), o que permite:
+
+- **Docker:** Nginx faz proxy de `/login`, `/customers` e `/socket.io` para o backend
+- **Dev local:** Vite proxy em `vite.config.ts` encaminha as mesmas rotas para `localhost:3000`
+
+O interceptor do Axios anexa automaticamente o header:
+
+```http
+Authorization: Bearer <token>
 ```
+
+**WebSocket:** conecta na mesma origem da aplicação. O dashboard e a listagem por cidade escutam o evento `customer_updated` e recarregam os dados após uma edição.
+
+Opcionalmente, defina `VITE_API_URL` para apontar a outro host (ex.: em deploy customizado).
+
+---
+
+## Docker
+
+O `Dockerfile` faz build de produção com Vite e serve os arquivos estáticos via Nginx. A configuração em `nginx.conf` inclui:
+
+- Fallback SPA (`try_files` → `index.html`)
+- Proxy reverso para a API e WebSocket do backend
+
+No `docker compose up`, acesse http://localhost:8080
+
+> **Nota:** alterações no código do frontend exigem `docker compose up --build` para refletir na tela. Para hot reload, use `npm run dev` localmente.
+
+---
+
+## Executar localmente
+
+**Pré-requisito:** API rodando em http://localhost:3000
+
+```bash
+npm install
+npm run dev
+```
+
+Acesse http://localhost:5173 e faça login com:
+
+| Campo | Valor |
+|-------|-------|
+| Email | `admin@email.com` |
+| Senha | `admin` |
+
+---
+
+## Scripts
+
+```bash
+npm run dev          # Dev server com HMR
+npm run build        # Build de produção (dist/)
+npm run preview      # Preview do build
+npm run type-check   # Verificação de tipos
+npm run lint         # ESLint
+npm run format       # Prettier
+```
+
+---
+
+## Fluxo do usuário
+
+1. **Login** — obtém JWT e armazena no `localStorage`
+2. **Dashboard** — cards exibem `{ city, customers_total }`; clique navega para a cidade
+3. **Lista por cidade** — paginação de 10 itens; clique no cliente abre detalhes
+4. **Detalhes** — formulário de edição; ao salvar, a API emite WebSocket e o dashboard atualiza automaticamente

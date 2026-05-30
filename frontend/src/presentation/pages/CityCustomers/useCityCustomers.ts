@@ -56,6 +56,7 @@ export const useCityCustomers = (cityName: string | undefined) => {
   }, [fetchCustomers]);
 
   const handlePageChange = (page: number) => {
+    setLoading(true);
     setCurrentPage(page);
   };
 

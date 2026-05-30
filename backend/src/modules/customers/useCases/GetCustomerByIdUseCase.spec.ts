@@ -8,7 +8,11 @@ jest.mock("../../../shared/infra/database/prisma/client", () => ({
 }));
 
 describe("GetCustomerByIdUseCase", () => {
-  it("should return the customer details by ID", async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should return customer details with city name", async () => {
     const mockCustomer = {
       id: 1,
       first_name: "Laura",
@@ -26,6 +30,11 @@ describe("GetCustomerByIdUseCase", () => {
     const useCase = new GetCustomerByIdUseCase();
     const result = await useCase.execute(1);
 
+    expect(prisma.customer.findUnique).toHaveBeenCalledWith({
+      where: { id: 1 },
+      include: { city: true },
+    });
+
     expect(result).toEqual({
       id: 1,
       first_name: "Laura",
@@ -38,8 +47,9 @@ describe("GetCustomerByIdUseCase", () => {
     });
   });
 
-  it("should throw an error if the customer is not found", async () => {
+  it("should throw when customer is not found", async () => {
     (prisma.customer.findUnique as jest.Mock).mockResolvedValue(null);
+
     const useCase = new GetCustomerByIdUseCase();
 
     await expect(useCase.execute(999)).rejects.toThrow("Customer not found");

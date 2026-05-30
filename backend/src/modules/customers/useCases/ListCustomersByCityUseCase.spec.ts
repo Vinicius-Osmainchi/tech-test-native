@@ -11,7 +11,11 @@ jest.mock("../../../shared/infra/database/prisma/client", () => ({
 }));
 
 describe("ListCustomersByCityUseCase", () => {
-  it("should return the customer list filtered by a specific city", async () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should return paginated customers filtered by city", async () => {
     const mockCustomers = [
       {
         id: 1,
@@ -26,7 +30,7 @@ describe("ListCustomersByCityUseCase", () => {
     ];
 
     (prisma.customer.findMany as jest.Mock).mockResolvedValue(mockCustomers);
-    (prisma.customer.count as jest.Mock).mockResolvedValue(1);
+    (prisma.customer.count as jest.Mock).mockResolvedValue(25);
 
     const useCase = new ListCustomersByCityUseCase();
     const result = await useCase.execute("Warner, NH", 1, 10);
@@ -43,7 +47,19 @@ describe("ListCustomersByCityUseCase", () => {
 
     expect(result).toEqual({
       customers: mockCustomers,
-      total: 1,
+      total: 25,
     });
+  });
+
+  it("should calculate skip offset based on page number", async () => {
+    (prisma.customer.findMany as jest.Mock).mockResolvedValue([]);
+    (prisma.customer.count as jest.Mock).mockResolvedValue(0);
+
+    const useCase = new ListCustomersByCityUseCase();
+    await useCase.execute("Warner, NH", 3, 10);
+
+    expect(prisma.customer.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ skip: 20, take: 10 }),
+    );
   });
 });

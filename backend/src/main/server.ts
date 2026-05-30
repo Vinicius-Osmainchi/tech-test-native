@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { server } from "../shared/infra/http/app";
 
 server.listen(3000, () => {

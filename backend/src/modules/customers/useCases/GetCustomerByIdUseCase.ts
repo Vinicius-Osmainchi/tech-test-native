@@ -1,7 +1,8 @@
 import { prisma } from "../../../shared/infra/database/prisma/client";
+import { Customer } from "../domain/customer";
 
 export class GetCustomerByIdUseCase {
-  async execute(id: number) {
+  async execute(id: number): Promise<Customer> {
     const customer = await prisma.customer.findUnique({
       where: { id },
       include: {

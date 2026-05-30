@@ -1,25 +1,7 @@
 import { api } from "./api";
+import type { CityTotal, Customer, PaginatedCustomers } from "../../domain/models/Customer";
 
-export interface Customer {
-  id: number;
-  first_name: string;
-  last_name: string;
-  email: string;
-  gender: string;
-  company: string;
-  city: string;
-  title: string;
-}
-
-export interface CityTotal {
-  city: string;
-  customers_total: number;
-}
-
-export interface PaginatedResponse {
-  customers: Customer[];
-  total: number;
-}
+export type { CityTotal, Customer, PaginatedCustomers };
 
 export const CustomerService = {
   getTotalsByCity: async (): Promise<CityTotal[]> => {
@@ -31,8 +13,8 @@ export const CustomerService = {
     city: string,
     page: number,
     limit: number,
-  ): Promise<PaginatedResponse> => {
-    const response = await api.get<PaginatedResponse>("/customers", {
+  ): Promise<PaginatedCustomers> => {
+    const response = await api.get<PaginatedCustomers>("/customers", {
       params: { city, page, limit },
     });
     return response.data;

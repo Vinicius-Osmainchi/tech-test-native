@@ -1,63 +1,185 @@
-# Tech Test - Backend
+# Backend — Tech Test Native
 
-Este é o ecossistema de backend da aplicação, desenvolvido em **Node.js** utilizando **TypeScript** e seguindo os princípios de uma **Arquitetura Modular Orientada a Recursos (Feature-Driven / Vertical Slicing)**.
+API REST em **Node.js** e **TypeScript** para gerenciamento de clientes, com autenticação JWT e notificações em tempo real via Socket.IO.
 
----
-
-## 🏗️ Arquitetura e Design de Software
-
-O projeto adota uma abordagem moderna de **Clean Architecture**, utilizando uma divisão vertical por módulos (_Vertical Slicing_).
-
-### Pilares da Escolha Arquitetural
-
-1. **Alta Coesão**: Todas as responsabilidades de um mesmo contexto de negócio são agrupadas sob o mesmo módulo (`src/modules/nome-do-modulo`). Isso elimina a necessidade de navegar por pastas globais distantes para dar manutenção a um único recurso.
-2. **Baixo Acoplamento**: Mantemos a regra de ouro da Clean Architecture intacta. A lógica de negócio e os casos de uso são independentes de frameworks, drivers e ferramentas externas (como Express ou Prisma).
-3. **Escalabilidade Pragmática**: Evita o _overengineering_ de dezenas de pastas vazias na raiz desde o primeiro dia. O projeto cresce de forma orgânica.
+Para executar o projeto completo com um comando, consulte o [README da raiz](../README.md).
 
 ---
 
-## 🛠️ Tecnologias e Decisões de Libs
+## Tecnologias
 
-- **Express**: Escolhido por sua maturidade, estabilidade e flexibilidade no ecossistema Node.js.
-- **Prisma ORM (v6)**: Acoplado para a comunicação com o banco MySQL. Proporciona tipagem estática ponta a ponta gerada automaticamente a partir do schema de dados.
-- **jsonwebtoken (JWT)**: Adotado para controle de autenticação via credenciais administrativas seguras mapeadas no `.env`.
-- **Jest & ts-jest**: Framework de testes unitários. A execução foi otimizada via `isolatedModules`, reduzindo o tempo de inicialização de testes para a escala de milissegundos.
-
----
-
-## 🚀 Integração Contínua (CI/CD)
-
-- **Husky (Local)**: Valida as mensagens de commit (_Commitlint_) e intercepta o comando `git push`, impedindo o envio em caso de falhas de tipagem estática ou quebra de testes.
-- **GitHub Actions (Nuvem)**: Pipeline automatizada a cada push para a branch `main`, garantindo qualidade do build final.
+| Tecnologia | Uso |
+|------------|-----|
+| Express 5 | Servidor HTTP |
+| Prisma 6 | ORM e migrations (MySQL) |
+| jsonwebtoken | Autenticação JWT |
+| Socket.IO | Evento `customer_updated` após edição de cliente |
+| Jest | Testes unitários dos use cases |
 
 ---
 
-## 🔧 Como Executar o Projeto
+## Arquitetura
 
-1. Inicie o banco de dados na raiz do monorepo:
-   ```bash
-   docker compose up -d
-   ```
-2. Acesse a pasta `backend`, instale as dependências e gere o cliente do Prisma:
-   ```bash
-   npm install
-   npx prisma generate
-   ```
-3. Execute o seed para alimentar a base de dados MySQL:
-   ```bash
-   npx prisma db seed
-   ```
-4. Execute o servidor em modo de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
+O código segue **vertical slicing** por módulo de negócio, inspirado em Clean Architecture:
+
+```
+src/
+├── modules/
+│   ├── auth/           # Login e geração de JWT
+│   └── customers/      # CRUD e consultas de clientes
+│       ├── domain/     # Tipos de domínio
+│       ├── useCases/   # Regras de negócio
+│       └── infra/      # Controllers e rotas HTTP
+├── shared/
+│   ├── errors/         # AppError
+│   └── infra/          # Express app, Prisma, middlewares
+└── main/
+    └── server.ts       # Entry point
+```
+
+Cada use case concentra a lógica de negócio. Controllers são finos: validam entrada, delegam ao use case e formatam a resposta HTTP.
 
 ---
 
-## 🧪 Executando a Suíte de Testes
+## Banco de dados
 
-Para rodar os testes unitários isolados:
+**Provider:** MySQL 8
+
+**Modelos principais:**
+
+- `City` — nome único da cidade
+- `Customer` — dados do cliente, relacionado a `City` via `city_id`
+
+**Seed:** `prisma/seed.ts` lê `prisma/customers.json` e popula as tabelas.
+
+### Comandos Prisma
 
 ```bash
-npm run test
+npx prisma generate    # Gera o client
+npx prisma db push     # Aplica schema no banco
+npx prisma db seed     # Popula dados iniciais
+npx prisma studio      # Interface visual (opcional)
 ```
+
+---
+
+## Variáveis de ambiente
+
+Crie um arquivo `.env` na pasta `backend/` (necessário apenas para desenvolvimento local). Use o template:
+
+```bash
+cp .env.example .env
+```
+
+Conteúdo:
+
+```env
+DATABASE_URL="mysql://root:root@localhost:3306/tech_test"
+JWT_SECRET="test_secret"
+```
+
+| Variável | Descrição |
+|----------|-----------|
+| `DATABASE_URL` | Connection string MySQL |
+| `JWT_SECRET` | Chave para assinar e validar JWT |
+
+No Docker Compose, essas variáveis são injetadas automaticamente no serviço `backend`.
+
+---
+
+## Docker
+
+O `Dockerfile` builda a aplicação para produção. No `docker compose up`, o backend:
+
+1. Aguarda o MySQL ficar saudável
+2. Executa `prisma db push` e `prisma db seed`
+3. Inicia o servidor na porta `3000` (rede interna)
+
+O frontend (Nginx) expõe a aplicação em http://localhost:8080 e faz proxy das rotas da API para este serviço.
+
+---
+
+## Executar localmente
+
+**Pré-requisito:** MySQL rodando (ex.: container Docker na porta 3306).
+
+```bash
+npm install
+npx prisma generate
+npx prisma db push
+npx prisma db seed
+npm run dev
+```
+
+A API ficará disponível em http://localhost:3000
+
+---
+
+## API
+
+### Autenticação
+
+```http
+POST /login
+Content-Type: application/json
+
+{ "email": "admin@email.com", "password": "admin" }
+```
+
+Retorna `{ "token": "..." }`. Envie em todas as rotas de clientes:
+
+```http
+Authorization: Bearer <token>
+```
+
+### Clientes
+
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `GET` | `/customers/totals-by-city` | Totais agrupados por cidade |
+| `GET` | `/customers?city=&page=&limit=` | Listagem paginada por cidade |
+| `GET` | `/customers/:id` | Detalhes de um cliente |
+| `PUT` | `/customers/:id` | Atualizar cliente |
+
+**Query params da listagem:**
+
+| Param | Tipo | Padrão | Descrição |
+|-------|------|--------|-----------|
+| `city` | string | — | Nome da cidade (ex.: `Warner, NH`) |
+| `page` | number | `1` | Página atual |
+| `limit` | number | `10` | Itens por página |
+
+**WebSocket:** após um `PUT` bem-sucedido, o servidor emite `customer_updated` para todos os clientes conectados.
+
+### Tratamento de erros
+
+Erros de negócio lançam `AppError` com status HTTP apropriado. O middleware global `errorHandler` retorna:
+
+```json
+{ "error": "mensagem descritiva" }
+```
+
+---
+
+## Scripts
+
+```bash
+npm run dev          # Servidor com hot reload (tsx)
+npm run build        # Compila TypeScript → dist/
+npm run type-check   # Verificação de tipos
+npm run test         # Testes unitários (Jest)
+npm run lint         # ESLint
+npm run format       # Prettier
+```
+
+---
+
+## Testes
+
+Testes unitários cobrem os use cases de clientes e autenticação, com Prisma mockado:
+
+```bash
+npm test
+```
+
+Não há testes de integração HTTP; a cobertura foca na lógica de negócio isolada.

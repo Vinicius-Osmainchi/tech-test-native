@@ -3,14 +3,9 @@ import { GetCustomersTotalByCityUseCase } from "../../../useCases/GetCustomersTo
 
 export class GetCustomersTotalByCityController {
   async handle(request: Request, response: Response): Promise<Response> {
-    try {
-      const useCase = new GetCustomersTotalByCityUseCase();
+    const useCase = new GetCustomersTotalByCityUseCase();
+    const result = await useCase.execute();
 
-      const result = await useCase.execute();
-
-      return response.status(200).json(result);
-    } catch {
-      return response.status(500).json({ error: "Internal server error" });
-    }
+    return response.status(200).json(result);
   }
 }

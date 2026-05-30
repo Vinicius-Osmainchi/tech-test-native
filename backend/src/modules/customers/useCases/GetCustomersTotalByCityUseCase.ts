@@ -1,7 +1,8 @@
 import { prisma } from "../../../shared/infra/database/prisma/client";
+import { CityTotal } from "../domain/customer";
 
 export class GetCustomersTotalByCityUseCase {
-  async execute() {
+  async execute(): Promise<CityTotal[]> {
     const cities = await prisma.city.findMany({
       select: {
         name: true,

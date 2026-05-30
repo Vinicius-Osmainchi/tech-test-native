@@ -1,18 +1,8 @@
 import { prisma } from "../../../shared/infra/database/prisma/client";
-
-interface UpdateCustomerRequest {
-  id: number;
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  gender?: string;
-  company?: string;
-  title?: string;
-  city?: string;
-}
+import { UpdateCustomerData } from "../domain/customer";
 
 export class UpdateCustomerUseCase {
-  async execute(data: UpdateCustomerRequest) {
+  async execute(data: UpdateCustomerData) {
     const { id, city, ...rest } = data;
 
     const customerExists = await prisma.customer.findUnique({

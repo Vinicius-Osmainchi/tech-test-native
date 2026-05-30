@@ -22,7 +22,7 @@ export function CustomerDetails() {
         <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
           Voltar
         </Button>
-        <h1 className="text-2xl font-bold text-gray-800 m-0">Editar Cliente #{id}</h1>
+        <h1 className="text-2xl font-bold text-gray-800 m-0">Detalhes do Cliente #{id}</h1>
       </div>
 
       {error && (
@@ -52,6 +52,16 @@ export function CustomerDetails() {
           <Form.Item name="email" label="E-mail" rules={[{ required: true, type: "email" }]}>
             <Input />
           </Form.Item>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Form.Item name="gender" label="Gênero">
+              <Input />
+            </Form.Item>
+
+            <Form.Item name="city" label="Cidade">
+              <Input />
+            </Form.Item>
+          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <Form.Item name="company" label="Empresa">
