@@ -52,7 +52,7 @@ Aguarde os containers iniciarem e acesse:
 | Email | `admin@email.com` |
 | Senha | `admin` |
 
-O frontend (Nginx) serve o dashboard e faz proxy das rotas `/login`, `/customers`, `/docs` e `/socket.io` para o backend. Não é necessário rodar nada manualmente.
+O frontend (Nginx) serve o dashboard e faz proxy de `/api` (API), `/docs` (Swagger) e `/socket.io` para o backend. As rotas React (`/login`, `/dashboard`, etc.) ficam no frontend — não conflitam com a API.
 
 **Documentação da API (Swagger):** http://localhost:8080/docs
 
@@ -117,7 +117,9 @@ npm install
 npm run dev
 ```
 
-Acesse http://localhost:5173 — o Vite faz proxy das requisições para a API em `localhost:3000`.
+Acesse http://localhost:5173/login — o Vite faz proxy de `/api` para a API em `localhost:3000`.
+
+> **Importante:** a API usa o prefixo `/api`. O frontend usa `/login` só como rota React; chamadas HTTP vão para `/api/login`.
 
 ---
 
@@ -128,7 +130,7 @@ Todos os endpoints de clientes exigem JWT no header `Authorization: Bearer <toke
 **Login**
 
 ```http
-POST /login
+POST /api/login
 Content-Type: application/json
 
 {
@@ -166,11 +168,11 @@ Documentação interativa: **http://localhost:8080/docs** (Docker) ou **http://l
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `POST` | `/login` | Autenticação (público) |
-| `GET` | `/customers/totals-by-city` | Total de clientes agrupados por cidade |
-| `GET` | `/customers?city={cidade}&page={n}&limit={n}` | Clientes de uma cidade (paginado) |
-| `GET` | `/customers/:id` | Detalhes de um cliente |
-| `PUT` | `/customers/:id` | Atualizar um cliente |
+| `POST` | `/api/login` | Autenticação (público) |
+| `GET` | `/api/customers/totals-by-city` | Total de clientes agrupados por cidade |
+| `GET` | `/api/customers?city={cidade}&page={n}&limit={n}` | Clientes de uma cidade (paginado) |
+| `GET` | `/api/customers/:id` | Detalhes de um cliente |
+| `PUT` | `/api/customers/:id` | Atualizar um cliente |
 
 ### Exemplos de resposta
 
@@ -214,7 +216,7 @@ Documentação interativa: **http://localhost:8080/docs** (Docker) ou **http://l
 }
 ```
 
-Ao editar um cliente (`PUT /customers/:id`), a API emite o evento WebSocket `customer_updated`, atualizando o dashboard em tempo real.
+Ao editar um cliente (`PUT /api/customers/:id`), a API emite o evento WebSocket `customer_updated`, atualizando o dashboard em tempo real.
 
 ---
 

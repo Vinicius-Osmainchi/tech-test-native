@@ -104,7 +104,7 @@ export const openApiDocument = {
     },
   },
   paths: {
-    "/login": {
+    "/api/login": {
       post: {
         tags: ["Auth"],
         summary: "Autenticar usuário",
@@ -136,7 +136,7 @@ export const openApiDocument = {
         },
       },
     },
-    "/customers/totals-by-city": {
+    "/api/customers/totals-by-city": {
       get: {
         tags: ["Customers"],
         summary: "Total de clientes por cidade",
@@ -164,7 +164,7 @@ export const openApiDocument = {
         },
       },
     },
-    "/customers": {
+    "/api/customers": {
       get: {
         tags: ["Customers"],
         summary: "Listar clientes por cidade (paginado)",
@@ -216,7 +216,7 @@ export const openApiDocument = {
         },
       },
     },
-    "/customers/{id}": {
+    "/api/customers/{id}": {
       get: {
         tags: ["Customers"],
         summary: "Consultar cliente por ID",

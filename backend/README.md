@@ -130,7 +130,7 @@ Interface interativa disponível em:
 
 Spec OpenAPI em JSON: `/docs/openapi.json`
 
-No Swagger UI, use **Authorize** com o token obtido em `POST /login` (`Bearer <token>`).
+No Swagger UI, use **Authorize** com o token obtido em `POST /api/login` (`Bearer <token>`).
 
 As requisições usam automaticamente o mesmo host do Swagger (ex.: `http://localhost:8080` no Docker). Não selecione `localhost:3000` no Docker — o backend não é exposto nessa porta.
 
@@ -141,7 +141,7 @@ As requisições usam automaticamente o mesmo host do Swagger (ex.: `http://loca
 ### Autenticação
 
 ```http
-POST /login
+POST /api/login
 Content-Type: application/json
 
 { "email": "admin@email.com", "password": "admin" }
@@ -157,10 +157,10 @@ Authorization: Bearer <token>
 
 | Método | Rota | Descrição |
 |--------|------|-----------|
-| `GET` | `/customers/totals-by-city` | Totais agrupados por cidade |
-| `GET` | `/customers?city=&page=&limit=` | Listagem paginada por cidade |
-| `GET` | `/customers/:id` | Detalhes de um cliente |
-| `PUT` | `/customers/:id` | Atualizar cliente |
+| `GET` | `/api/customers/totals-by-city` | Totais agrupados por cidade |
+| `GET` | `/api/customers?city=&page=&limit=` | Listagem paginada por cidade |
+| `GET` | `/api/customers/:id` | Detalhes de um cliente |
+| `PUT` | `/api/customers/:id` | Atualizar cliente |
 
 **Query params da listagem:**
 

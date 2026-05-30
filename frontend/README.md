@@ -60,8 +60,8 @@ Rotas protegidas passam pelo `AuthGuard`, que redireciona para `/login` se não 
 
 As requisições usam URLs relativas (`baseURL` vazio), o que permite:
 
-- **Docker:** Nginx faz proxy de `/login`, `/customers` e `/socket.io` para o backend
-- **Dev local:** Vite proxy em `vite.config.ts` encaminha as mesmas rotas para `localhost:3000`
+- **Docker:** Nginx faz proxy de `/api`, `/docs` e `/socket.io` para o backend
+- **Dev local:** Vite proxy encaminha `/api` para `localhost:3000` (base URL do Axios: `/api`)
 
 O interceptor do Axios anexa automaticamente o header:
 

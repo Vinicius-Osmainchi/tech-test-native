@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthService } from "../../../data/services/AuthService";
+import { setAuthToken } from "../../../data/services/authStorage";
 import { AxiosError } from "axios";
 
 interface LoginFormData {
@@ -20,7 +21,7 @@ export const useLogin = () => {
 
     try {
       const response = await AuthService.login(values.email, values.password);
-      localStorage.setItem("@TechTest:token", response.token);
+      setAuthToken(response.token);
       navigate("/dashboard");
     } catch (err) {
       if (err instanceof AxiosError && err.response?.data?.error) {
