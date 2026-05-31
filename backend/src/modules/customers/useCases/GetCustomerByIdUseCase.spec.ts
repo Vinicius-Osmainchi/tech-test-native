@@ -1,5 +1,6 @@
 import { GetCustomerByIdUseCase } from "./GetCustomerByIdUseCase";
 import { prisma } from "../../../shared/infra/database/prisma/client";
+import { apiErrorCodes } from "../../../shared/errors/apiErrorCodes";
 
 jest.mock("../../../shared/infra/database/prisma/client", () => ({
   prisma: {
@@ -52,6 +53,10 @@ describe("GetCustomerByIdUseCase", () => {
 
     const useCase = new GetCustomerByIdUseCase();
 
-    await expect(useCase.execute(999)).rejects.toThrow("Customer not found");
+    await expect(useCase.execute(999)).rejects.toMatchObject({
+      message: "Customer not found",
+      statusCode: 404,
+      code: apiErrorCodes.CUSTOMER_NOT_FOUND,
+    });
   });
 });

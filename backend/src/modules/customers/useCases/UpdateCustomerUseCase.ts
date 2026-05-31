@@ -1,5 +1,7 @@
 import { prisma } from "../../../shared/infra/database/prisma/client";
 import { UpdateCustomerData } from "../domain/customer";
+import { AppError } from "../../../shared/errors/AppError";
+import { apiErrorCodes } from "../../../shared/errors/apiErrorCodes";
 
 export class UpdateCustomerUseCase {
   async execute(data: UpdateCustomerData) {
@@ -10,7 +12,7 @@ export class UpdateCustomerUseCase {
     });
 
     if (!customerExists) {
-      throw new Error("Customer not found");
+      throw new AppError("Customer not found", 404, apiErrorCodes.CUSTOMER_NOT_FOUND);
     }
 
     let cityId = customerExists.city_id;

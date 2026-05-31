@@ -1,5 +1,7 @@
 import { prisma } from "../../../shared/infra/database/prisma/client";
 import { Customer } from "../domain/customer";
+import { AppError } from "../../../shared/errors/AppError";
+import { apiErrorCodes } from "../../../shared/errors/apiErrorCodes";
 
 export class GetCustomerByIdUseCase {
   async execute(id: number): Promise<Customer> {
@@ -11,7 +13,7 @@ export class GetCustomerByIdUseCase {
     });
 
     if (!customer) {
-      throw new Error("Customer not found");
+      throw new AppError("Customer not found", 404, apiErrorCodes.CUSTOMER_NOT_FOUND);
     }
 
     const { city_id, city, ...rest } = customer;

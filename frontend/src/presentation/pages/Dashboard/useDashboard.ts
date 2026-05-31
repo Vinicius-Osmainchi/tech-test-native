@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { type CityTotal, CustomerService } from "../../../data/services/CustomerService";
 import { socket } from "../../../data/services/socket";
+import { uiMessages } from "../../../shared/messages";
 
 export const useDashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -19,7 +20,7 @@ export const useDashboard = () => {
       })
       .catch(() => {
         if (isMounted) {
-          setError("Não foi possível carregar os dados do dashboard.");
+          setError(uiMessages.dashboardLoadFailed);
         }
       })
       .finally(() => {

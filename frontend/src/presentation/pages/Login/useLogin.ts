@@ -2,11 +2,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthService } from "../../../data/services/AuthService";
 import { setAuthToken } from "../../../data/services/authStorage";
+import { resolveApiErrorMessage, uiMessages } from "../../../shared/messages";
 import { AxiosError } from "axios";
 
 interface LoginFormData {
   email: string;
   password: string;
+}
+
+interface LoginErrorResponse {
+  code?: string;
+  error?: string;
 }
 
 export const useLogin = () => {
@@ -17,18 +23,17 @@ export const useLogin = () => {
   const handleLogin = async (values: LoginFormData) => {
     setLoading(true);
     setError(null);
-    const defaultErrorMessage = "Ocorreu um erro durante o login. Por favor, tente novamente.";
 
     try {
       const response = await AuthService.login(values.email, values.password);
       setAuthToken(response.token);
       navigate("/dashboard");
     } catch (err) {
-      if (err instanceof AxiosError && err.response?.data?.error) {
-        const backendError = err.response.data.error;
-        setError(backendError);
+      if (err instanceof AxiosError) {
+        const data = err.response?.data as LoginErrorResponse | undefined;
+        setError(resolveApiErrorMessage(data, uiMessages.loginFailed));
       } else {
-        setError(defaultErrorMessage);
+        setError(uiMessages.loginFailed);
       }
     } finally {
       setLoading(false);

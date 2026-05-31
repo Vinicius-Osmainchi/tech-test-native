@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { UpdateCustomerUseCase } from "../../../useCases/UpdateCustomerUseCase";
 import { AppError } from "../../../../../shared/errors/AppError";
+import { apiErrorCodes } from "../../../../../shared/errors/apiErrorCodes";
 
 export class UpdateCustomerController {
   async handle(request: Request, response: Response): Promise<Response> {
@@ -10,7 +11,7 @@ export class UpdateCustomerController {
     const parsedId = parseInt(String(id), 10);
 
     if (isNaN(parsedId)) {
-      throw new AppError("Invalid ID format");
+      throw new AppError("Invalid ID format", 400, apiErrorCodes.INVALID_ID_FORMAT);
     }
 
     const useCase = new UpdateCustomerUseCase();
@@ -25,10 +26,10 @@ export class UpdateCustomerController {
 
       return response.status(200).json(updatedCustomer);
     } catch (error: unknown) {
-      if (error instanceof Error && error.message === "Customer not found") {
-        throw new AppError(error.message, 404);
+      if (error instanceof AppError && error.code === apiErrorCodes.CUSTOMER_NOT_FOUND) {
+        throw error;
       }
-      throw new AppError("Error updating customer");
+      throw new AppError("Error updating customer", 400, apiErrorCodes.ERROR_UPDATING_CUSTOMER);
     }
   }
 }

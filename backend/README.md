@@ -80,12 +80,16 @@ Conteúdo:
 ```env
 DATABASE_URL="mysql://root:root@localhost:3306/tech_test"
 JWT_SECRET="test_secret"
+ADMIN_EMAIL="admin@email.com"
+ADMIN_PASSWORD="admin"
 ```
 
 | Variável | Descrição |
 |----------|-----------|
 | `DATABASE_URL` | Connection string MySQL |
 | `JWT_SECRET` | Chave para assinar e validar JWT |
+| `ADMIN_EMAIL` | E-mail do usuário administrativo |
+| `ADMIN_PASSWORD` | Senha do usuário administrativo |
 
 No Docker Compose, essas variáveis são injetadas automaticamente no serviço `backend`.
 

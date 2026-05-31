@@ -1,4 +1,6 @@
 import jwt from "jsonwebtoken";
+import { AppError } from "../../../shared/errors/AppError";
+import { apiErrorCodes } from "../../../shared/errors/apiErrorCodes";
 
 interface LoginRequest {
   email: string;
@@ -7,14 +9,20 @@ interface LoginRequest {
 
 export class LoginUseCase {
   async execute({ email, password }: LoginRequest) {
-    if (email !== "admin@email.com" || password !== "admin") {
-      throw new Error("Invalid credentials");
-    }
-
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
     const secret = process.env.JWT_SECRET;
 
+    if (!adminEmail || !adminPassword) {
+      throw new AppError("ADMIN_EMAIL or ADMIN_PASSWORD is not defined", 500);
+    }
+
     if (!secret) {
-      throw new Error("JWT_SECRET is not defined");
+      throw new AppError("JWT_SECRET is not defined", 500);
+    }
+
+    if (email !== adminEmail || password !== adminPassword) {
+      throw new AppError("Invalid credentials", 401, apiErrorCodes.INVALID_CREDENTIALS);
     }
 
     const token = jwt.sign({ email, role: "admin" }, secret, {

@@ -45,12 +45,12 @@ Aguarde os containers iniciarem e acesse:
 |---------|-----|
 | **Aplicação (frontend + API via proxy)** | http://localhost:8080 |
 
-**Credenciais de login:**
+**Credenciais de login** (padrão do `.env` / Docker):
 
-| Campo | Valor |
-|-------|-------|
-| Email | `admin@email.com` |
-| Senha | `admin` |
+| Campo | Variável | Valor padrão |
+|-------|----------|--------------|
+| Email | `ADMIN_EMAIL` | `admin@email.com` |
+| Senha | `ADMIN_PASSWORD` | `admin` |
 
 O frontend (Nginx) serve o dashboard e faz proxy de `/api` (API), `/docs` (Swagger) e `/socket.io` para o backend. As rotas React (`/login`, `/dashboard`, etc.) ficam no frontend — não conflitam com a API.
 

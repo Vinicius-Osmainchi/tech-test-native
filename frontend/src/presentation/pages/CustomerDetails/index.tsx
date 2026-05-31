@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Form, Input, Button, Alert, Spin } from "antd";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { useCustomerDetails } from "./useCustomerDetails";
+import { validationMessages, uiMessages } from "../../../shared/messages";
 
 export function CustomerDetails() {
   const { id } = useParams<{ id: string }>();
@@ -33,23 +34,38 @@ export function CustomerDetails() {
 
       {success && (
         <div className="mb-4">
-          <Alert title="Cliente atualizado com sucesso!" type="success" showIcon />
+          <Alert title={uiMessages.customerUpdateSuccess} type="success" showIcon />
         </div>
       )}
 
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
         <Form form={form} layout="vertical" onFinish={onFinish}>
           <div className="grid grid-cols-2 gap-4">
-            <Form.Item name="first_name" label="Nome" rules={[{ required: true }]}>
+            <Form.Item
+              name="first_name"
+              label="Nome"
+              rules={[{ required: true, message: validationMessages.firstNameRequired }]}
+            >
               <Input />
             </Form.Item>
 
-            <Form.Item name="last_name" label="Sobrenome" rules={[{ required: true }]}>
+            <Form.Item
+              name="last_name"
+              label="Sobrenome"
+              rules={[{ required: true, message: validationMessages.lastNameRequired }]}
+            >
               <Input />
             </Form.Item>
           </div>
 
-          <Form.Item name="email" label="E-mail" rules={[{ required: true, type: "email" }]}>
+          <Form.Item
+            name="email"
+            label="E-mail"
+            rules={[
+              { required: true, message: validationMessages.emailRequired },
+              { type: "email", message: validationMessages.emailInvalid },
+            ]}
+          >
             <Input />
           </Form.Item>
 
@@ -75,7 +91,7 @@ export function CustomerDetails() {
 
           <div className="flex justify-end pt-4">
             <Button type="primary" htmlType="submit" loading={saving} icon={<SaveOutlined />}>
-              Salvar Alterações
+              Salvar alterações
             </Button>
           </div>
         </Form>

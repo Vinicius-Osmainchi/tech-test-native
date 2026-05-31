@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { type Customer, CustomerService } from "../../../data/services/CustomerService";
+import { uiMessages } from "../../../shared/messages";
 import { Form } from "antd";
 
 export const useCustomerDetails = (id: string | undefined) => {
@@ -30,7 +31,7 @@ export const useCustomerDetails = (id: string | undefined) => {
       })
       .catch(() => {
         if (isMounted) {
-          setError("Não foi possível carregar os detalhes do cliente.");
+          setError(uiMessages.customerLoadFailed);
         }
       })
       .finally(() => {
@@ -59,7 +60,7 @@ export const useCustomerDetails = (id: string | undefined) => {
         navigate(-1);
       }, 1500);
     } catch {
-      setError("Erro ao atualizar o cliente.");
+      setError(uiMessages.customerUpdateFailed);
     } finally {
       setSaving(false);
     }

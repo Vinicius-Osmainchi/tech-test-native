@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { type Customer, CustomerService } from "../../../data/services/CustomerService";
 import { socket } from "../../../data/services/socket";
+import { uiMessages } from "../../../shared/messages";
 
 export const useCityCustomers = (cityName: string | undefined) => {
   const [data, setData] = useState<Customer[]>([]);
@@ -29,7 +30,7 @@ export const useCityCustomers = (cityName: string | undefined) => {
       })
       .catch(() => {
         if (isMounted) {
-          setError("Não foi possível carregar os clientes desta cidade.");
+          setError(uiMessages.cityCustomersLoadFailed);
         }
       })
       .finally(() => {

@@ -1,5 +1,6 @@
 import { Button, Card, Typography, Alert, Form, Input } from "antd";
 import { useLogin } from "./useLogin";
+import { validationMessages } from "../../../shared/messages";
 
 const { Title } = Typography;
 
@@ -22,17 +23,19 @@ export function Login() {
         <Form name="login" onFinish={handleLogin} layout="vertical" size="large">
           <Form.Item
             name="email"
+            label="E-mail"
             rules={[
-              { required: true, message: "Por favor, insira o email!" },
-              { type: "email", message: "Insira um email válido!" },
+              { required: true, message: validationMessages.emailRequired },
+              { type: "email", message: validationMessages.emailInvalid },
             ]}
           >
-            <Input placeholder="Digite seu email" />
+            <Input placeholder="Digite seu e-mail" />
           </Form.Item>
 
           <Form.Item
             name="password"
-            rules={[{ required: true, message: "Por favor, insira a senha!" }]}
+            label="Senha"
+            rules={[{ required: true, message: validationMessages.passwordRequired }]}
           >
             <Input.Password placeholder="Digite sua senha" />
           </Form.Item>
