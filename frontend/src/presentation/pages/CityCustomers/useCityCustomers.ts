@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { type Customer, CustomerService } from "../../../data/services/CustomerService";
+import { type Customer, CustomerService } from "../../../data/services/customerService";
 import { socket } from "../../../data/services/socket";
 import { uiMessages } from "../../../shared/messages";
 

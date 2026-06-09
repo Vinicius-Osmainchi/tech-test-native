@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AuthService } from "../../../data/services/AuthService";
+import { AuthService } from "../../../data/services/authService";
 import { setAuthToken } from "../../../data/services/authStorage";
 import { resolveApiErrorMessage, uiMessages } from "../../../shared/messages";
 import { AxiosError } from "axios";

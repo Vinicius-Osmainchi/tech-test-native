@@ -1,65 +1,40 @@
 import { ListCustomersByCityUseCase } from "./ListCustomersByCityUseCase";
-import { prisma } from "../../../shared/infra/database/prisma/client";
+import { CustomerRepository } from "../infra/database/repositories/CustomerRepository";
 
-jest.mock("../../../shared/infra/database/prisma/client", () => ({
-  prisma: {
-    customer: {
-      findMany: jest.fn(),
-      count: jest.fn(),
-    },
-  },
-}));
+jest.mock("../infra/database/repositories/CustomerRepository");
 
 describe("ListCustomersByCityUseCase", () => {
+  let customerRepository: jest.Mocked<CustomerRepository>;
+  let useCase: ListCustomersByCityUseCase;
+
   beforeEach(() => {
-    jest.clearAllMocks();
+    customerRepository = new CustomerRepository() as jest.Mocked<CustomerRepository>;
+    useCase = new ListCustomersByCityUseCase(customerRepository);
   });
 
-  it("should return paginated customers filtered by city", async () => {
-    const mockCustomers = [
-      {
-        id: 1,
-        first_name: "Laura",
-        last_name: "Richards",
-        email: "lrichards0@reverbnation.com",
-        gender: "Female",
-        company: "Meezzy",
-        title: "Biostatistician III",
-        city_id: 1,
-      },
-    ];
+  it("should return customers by city", async () => {
+    const mockCustomers = {
+      customers: [
+        {
+          id: 1,
+          first_name: "John",
+          last_name: "Doe",
+          email: "john@example.com",
+          phone: "1234567890",
+          city: "New York",
+          gender: "Male",
+          company: "Acme",
+          title: "Engineer",
+        },
+      ],
+      total: 1,
+    };
 
-    (prisma.customer.findMany as jest.Mock).mockResolvedValue(mockCustomers);
-    (prisma.customer.count as jest.Mock).mockResolvedValue(25);
+    customerRepository.findByCity.mockResolvedValue(mockCustomers);
 
-    const useCase = new ListCustomersByCityUseCase();
-    const result = await useCase.execute("Warner, NH", 1, 10);
+    const result = await useCase.execute("New York", 1, 10);
 
-    expect(prisma.customer.findMany).toHaveBeenCalledWith({
-      where: { city: { name: "Warner, NH" } },
-      skip: 0,
-      take: 10,
-    });
-
-    expect(prisma.customer.count).toHaveBeenCalledWith({
-      where: { city: { name: "Warner, NH" } },
-    });
-
-    expect(result).toEqual({
-      customers: mockCustomers,
-      total: 25,
-    });
-  });
-
-  it("should calculate skip offset based on page number", async () => {
-    (prisma.customer.findMany as jest.Mock).mockResolvedValue([]);
-    (prisma.customer.count as jest.Mock).mockResolvedValue(0);
-
-    const useCase = new ListCustomersByCityUseCase();
-    await useCase.execute("Warner, NH", 3, 10);
-
-    expect(prisma.customer.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ skip: 20, take: 10 }),
-    );
+    expect(result).toEqual(mockCustomers);
+    expect(customerRepository.findByCity).toHaveBeenCalledWith("New York", 1, 10);
   });
 });

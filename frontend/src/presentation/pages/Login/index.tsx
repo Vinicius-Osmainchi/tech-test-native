@@ -40,7 +40,7 @@ export function Login() {
             <Input.Password placeholder="Digite sua senha" />
           </Form.Item>
 
-          <Form.Item className="mb-0">
+          <Form.Item className="mb-0 mt-1">
             <Button type="primary" htmlType="submit" block loading={loading}>
               Entrar
             </Button>

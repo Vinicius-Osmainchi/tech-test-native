@@ -1,115 +1,112 @@
-# Backend — Tech Test Native
+# Backend — Customer Management API
 
-API REST em **Node.js** e **TypeScript** para gerenciamento de clientes, com autenticação JWT e notificações em tempo real via Socket.IO.
+API REST construída em **Node.js** e **TypeScript** para gerenciamento de clientes, projetada com foco em Clean Architecture, Autenticação JWT segura e notificações reativas em tempo real via Socket.IO.
 
-Para executar o projeto completo com um comando, consulte o [README da raiz](../README.md).
-
----
-
-## Tecnologias
-
-| Tecnologia | Uso |
-|------------|-----|
-| Express 5 | Servidor HTTP |
-| Prisma 6 | ORM e migrations (MySQL) |
-| jsonwebtoken | Autenticação JWT |
-| Socket.IO | Evento `customer_updated` após edição de cliente |
-| Jest | Testes unitários dos use cases |
+Para executar o projeto completo com um único comando (Fullstack via Docker), consulte o [README da raiz](../README.md).
 
 ---
 
-## Arquitetura
+## 🛠️ Tecnologias e Ecossistema
 
-O código segue **vertical slicing** por módulo de negócio, inspirado em Clean Architecture:
+| Tecnologia             | Uso                                                                       |
+| ---------------------- | ------------------------------------------------------------------------- |
+| **Express 5**          | Servidor HTTP de alta performance (com suporte nativo a promises).        |
+| **Prisma ORM 6**       | Modelagem de dados, tipagem estática e migrations (MySQL).                |
+| **jsonwebtoken (JWT)** | Autenticação Stateless e controle de acesso a rotas protegidas.           |
+| **Socket.IO**          | Comunicação WebSocket bidirecional para atualizações de UI em tempo real. |
+| **Jest**               | Framework de testes para garantir a integridade das regras de negócio.    |
 
-```
+---
+
+## 🧠 Arquitetura e Padrões de Projeto
+
+O código foi desenhado para ser testável, coeso e altamente escalável. A estrutura adota **Vertical Slicing** (fatiamento por domínio de negócio) e aplica os princípios de **Clean Architecture** (SOLID, especificamente a Inversão de Dependência):
+
+```text
 src/
 ├── modules/
-│   ├── auth/           # Login e geração de JWT
-│   └── customers/      # CRUD e consultas de clientes
-│       ├── domain/     # Tipos de domínio
-│       ├── useCases/   # Regras de negócio
-│       └── infra/      # Controllers e rotas HTTP
+│   ├── auth/           # Domínio de Autenticação (Login e JWT)
+│   └── customers/      # Domínio de Clientes
+│       ├── domain/     # Entidades e tipagens puras do negócio
+│       ├── useCases/   # Casos de uso (Regras de negócio isoladas)
+│       └── infra/      # Detalhes de implementação externa
+│           ├── database/ # Repositórios (Isolamento do Prisma ORM)
+│           └── http/     # Controllers e Rotas Express
 ├── shared/
-│   ├── errors/         # AppError
-│   └── infra/          # Express app, Prisma, middlewares
+│   ├── errors/         # Classes de erro customizadas (AppError)
+│   └── infra/          # Configurações globais (App, Middlewares, Socket)
 └── main/
-    └── server.ts       # Entry point
+    └── server.ts       # Entry point da aplicação
 ```
 
-Cada use case concentra a lógica de negócio. Controllers são finos: validam entrada, delegam ao use case e formatam a resposta HTTP.
+### 🛡️ O Padrão de Repositório e Casos de Uso
+
+- **Controllers Finos:** Responsáveis apenas por receber a requisição HTTP, instanciar as dependências e devolver a resposta.
+- **UseCases (Agnósticos):** Toda a lógica de negócio vive aqui. Eles não sabem que o banco de dados é MySQL ou Prisma. Eles dependem apenas de contratos.
+- **Repositórios (Infra):** A única camada que interage de fato com o banco de dados. Isso permite que a aplicação seja amplamente testada através de Mocks, sem necessidade de levantar um banco real.
 
 ---
 
-## Banco de dados
+## 💾 Banco de Dados e Trade-offs (YAGNI)
 
 **Provider:** MySQL 8
 
 **Modelos principais:**
 
-- `City` — nome único da cidade (entidade de agrupamento usada no dashboard e nas listagens)
-- `Customer` — dados do cliente, relacionado a `City` via `city_id`
+- `City` — Entidade normalizada contendo o nome único da cidade. Base para agrupamento de dados de alta performance.
+- `Customer` — Tabela principal, relacionada à `City` via `city_id`.
 
-**Por que `company` e `title` ficam em `Customer`?**
-
-Cidade foi normalizada porque é eixo central do produto (cards, filtros, rotas). Empresa e cargo são atributos descritivos do cliente — não há agrupamento, relatório ou CRUD por empresa/cargo no escopo. Tabelas `companies` / `titles` adicionariam joins e complexidade no seed sem ganho funcional para este teste (overengineering).
-
-**Seed:** `prisma/seed.ts` lê `prisma/customers.json` e popula as tabelas.
+**Decisão de Arquitetura: Por que `company` e `title` não são tabelas separadas?**
+Aplicamos o princípio **YAGNI (You Aren't Gonna Need It)**. A cidade foi normalizada porque é o eixo central da navegação e relatórios do produto. Empresa e cargo são apenas atributos descritivos do perfil. Criar tabelas adicionais para eles adicionaria complexidade de joins desnecessária, configurando um _overengineering_ para o escopo atual de negócio.
 
 ### Comandos Prisma
 
+- `npx prisma generate`: Gera o client tipado (Roda automaticamente no install)
+- `npx prisma db push`: Sincroniza o schema com o banco de dados
+- `npx prisma db seed`: Popula o banco com os dados iniciais de teste
+- `npx prisma studio`: Abre a interface visual de administração do banco
+
 ```bash
-npx prisma generate    # Gera o client
-npx prisma db push     # Aplica schema no banco
-npx prisma db seed     # Popula dados iniciais
-npx prisma studio      # Interface visual (opcional)
+npx prisma generate
+npx prisma db push
+npx prisma db seed
+npx prisma studio
 ```
 
 ---
 
-## Variáveis de ambiente
+## ⚙️ Variáveis de Ambiente
 
-Crie um arquivo `.env` na pasta `backend/` (necessário apenas para desenvolvimento local). Use o template:
+Crie um arquivo `.env` na raiz do backend copiando o template (necessário apenas para desenvolvimento local):
 
 ```bash
 cp .env.example .env
 ```
 
-Conteúdo:
+| Variável         | Descrição                                   |
+| ---------------- | ------------------------------------------- |
+| `DATABASE_URL`   | Connection string do MySQL local.           |
+| `JWT_SECRET`     | Chave criptográfica para assinar os tokens. |
+| `ADMIN_EMAIL`    | Credencial padrão injetada pelo Seed.       |
+| `ADMIN_PASSWORD` | Senha padrão injetada pelo Seed.            |
 
-```env
-DATABASE_URL="mysql://root:root@localhost:3306/tech_test"
-JWT_SECRET="test_secret"
-ADMIN_EMAIL="admin@email.com"
-ADMIN_PASSWORD="admin"
-```
-
-| Variável | Descrição |
-|----------|-----------|
-| `DATABASE_URL` | Connection string MySQL |
-| `JWT_SECRET` | Chave para assinar e validar JWT |
-| `ADMIN_EMAIL` | E-mail do usuário administrativo |
-| `ADMIN_PASSWORD` | Senha do usuário administrativo |
-
-No Docker Compose, essas variáveis são injetadas automaticamente no serviço `backend`.
+_(Nota: No ambiente Docker Compose, essas variáveis são resolvidas e injetadas automaticamente na rede)._
 
 ---
 
-## Docker
+## 🐳 Execução via Docker
 
-O `Dockerfile` builda a aplicação para produção. No `docker compose up`, o backend:
+No `docker compose up`, o ciclo de vida deste contêiner realiza as seguintes etapas:
 
-1. Aguarda o MySQL ficar saudável
-2. Executa `prisma db push` e `prisma db seed`
-3. Inicia o servidor na porta `3000` (rede interna)
-
-O frontend (Nginx) expõe a aplicação em http://localhost:8080 e faz proxy das rotas da API para este serviço.
+1. Aguarda o `Healthcheck` do MySQL garantir que o banco está pronto.
+2. Executa as migrações (`prisma db push`) e popula o banco (`prisma db seed`).
+3. Inicia a API na porta `3000` (exposta apenas na rede interna do Docker).
 
 ---
 
-## Executar localmente
+## 💻 Desenvolvimento Local
 
-**Pré-requisito:** MySQL rodando (ex.: container Docker na porta 3306).
+**Pré-requisito:** Uma instância do MySQL rodando na porta 3306.
 
 ```bash
 npm install
@@ -119,28 +116,24 @@ npx prisma db seed
 npm run dev
 ```
 
-A API ficará disponível em http://localhost:3000
+A API ficará disponível em `http://localhost:3000`.
 
 ---
 
-## Documentação da API (Swagger)
+## 📖 Documentação Interativa (Swagger)
 
-Interface interativa disponível em:
+A API é auto-documentada usando o padrão OpenAPI.
 
-| Ambiente | URL |
-|----------|-----|
-| Local | http://localhost:3000/docs |
-| Docker | http://localhost:8080/docs |
+| Ambiente   | URL                          |
+| ---------- | ---------------------------- |
+| **Local**  | `http://localhost:3000/docs` |
+| **Docker** | `http://localhost:8080/docs` |
 
-Spec OpenAPI em JSON: `/docs/openapi.json`
-
-No Swagger UI, use **Authorize** com o token obtido em `POST /api/login` (`Bearer <token>`).
-
-As requisições usam automaticamente o mesmo host do Swagger (ex.: `http://localhost:8080` no Docker). Não selecione `localhost:3000` no Docker — o backend não é exposto nessa porta.
+No Swagger UI, utilize o botão **Authorize** informando o token JWT (`Bearer <token>`) gerado na rota de Login para testar os endpoints protegidos diretamente pelo navegador. O redirecionamento de diretório `/docs/` está configurado nativamente.
 
 ---
 
-## API
+## 🌐 Endpoints Principais
 
 ### Autenticação
 
@@ -151,60 +144,52 @@ Content-Type: application/json
 { "email": "admin@email.com", "password": "admin" }
 ```
 
-Retorna `{ "token": "..." }`. Envie em todas as rotas de clientes:
-
-```http
-Authorization: Bearer <token>
-```
+Retorna a chave JWT que deve ser enviada via Header (`Authorization: Bearer <token>`) nas rotas abaixo.
 
 ### Clientes
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| `GET` | `/api/customers/totals-by-city` | Totais agrupados por cidade |
-| `GET` | `/api/customers?city=&page=&limit=` | Listagem paginada por cidade |
-| `GET` | `/api/customers/:id` | Detalhes de um cliente |
-| `PUT` | `/api/customers/:id` | Atualizar cliente |
+| Método | Rota                                | Descrição                                         |
+| ------ | ----------------------------------- | ------------------------------------------------- |
+| `GET`  | `/api/customers/totals-by-city`     | Retorna o volume agrupado de clientes por cidade. |
+| `GET`  | `/api/customers?city=&page=&limit=` | Listagem paginada (Evita over-fetching).          |
+| `GET`  | `/api/customers/:id`                | Detalhes em profundidade de um cliente.           |
+| `PUT`  | `/api/customers/:id`                | Atualiza o cliente e dispara o evento WebSocket.  |
 
-**Query params da listagem:**
+### Tratamento de Erros e Resiliência
 
-| Param | Tipo | Padrão | Descrição |
-|-------|------|--------|-----------|
-| `city` | string | — | Nome da cidade (ex.: `Warner, NH`) |
-| `page` | number | `1` | Página atual |
-| `limit` | number | `10` | Itens por página |
-
-**WebSocket:** após um `PUT` bem-sucedido, o servidor emite `customer_updated` para todos os clientes conectados.
-
-### Tratamento de erros
-
-Erros de negócio lançam `AppError` com status HTTP apropriado. O middleware global `errorHandler` retorna:
+A aplicação conta com um _Error Handler Global_. Exceções não mapeadas retornam 500, enquanto regras de negócio quebradas (ex: cliente não encontrado) lançam instâncias de `AppError` com o _Status Code_ adequado e tipado:
 
 ```json
-{ "error": "mensagem descritiva" }
+{
+  "code": "CUSTOMER_NOT_FOUND",
+  "message": "Customer not found"
+}
 ```
 
 ---
 
-## Scripts
+## 🧪 Qualidade e Testes
+
+A suíte de testes unitários foca onde o valor está: as regras de negócio (`UseCases`). A camada de infraestrutura (Banco de Dados/Prisma) é 100% mockada através da abstração dos Repositórios, garantindo testes independentes e ultrarrápidos.
+
+_(Executa a suíte Jest)_
 
 ```bash
-npm run dev          # Servidor com hot reload (tsx)
-npm run build        # Compila TypeScript → dist/
-npm run type-check   # Verificação de tipos
-npm run test         # Testes unitários (Jest)
-npm run lint         # ESLint
-npm run format       # Prettier
+npm run test
 ```
 
----
+## 📜 Scripts Úteis
 
-## Testes
-
-Testes unitários cobrem os use cases de clientes e autenticação, com Prisma mockado:
+- `npm run dev`: Inicia servidor com tsx (Hot Reload)
+- `npm run build`: Transpila o projeto para JavaScript (dist/)
+- `npm run type-check`: Varredura estática de tipagem do TypeScript
+- `npm run lint`: Validação de regras e padronização (ESLint)
+- `npm run format`: Formatação padronizada de código (Prettier)
 
 ```bash
-npm test
+npm run dev
+npm run build
+npm run type-check
+npm run lint
+npm run format
 ```
-
-Não há testes de integração HTTP; a cobertura foca na lógica de negócio isolada.

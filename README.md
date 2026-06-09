@@ -1,17 +1,17 @@
-# Native IP — Tech Test Fullstack
+# Fullstack Customer Dashboard — Node.js & React
 
-API REST em Node.js + dashboard React para consulta e edição de clientes, com atualização em tempo real via WebSocket.
+Uma solução Fullstack (API REST em Node.js + Dashboard React) para consulta e edição de clientes, com atualizações em tempo real via WebSocket. Projetado com foco em Clean Architecture, performance e experiência do desenvolvedor.
 
-## Visão geral
+## 📌 Visão Geral
 
-Este repositório é um monorepo com:
+Este repositório é um monorepo que contém:
 
-| Pacote | Descrição |
-|--------|-----------|
-| `backend/` | API REST, autenticação JWT, WebSocket (Socket.IO) |
-| `frontend/` | Dashboard React com cards por cidade, listagem paginada e edição de clientes |
+| Pacote      | Descrição                                                                         |
+| ----------- | --------------------------------------------------------------------------------- |
+| `backend/`  | API REST estruturada via Vertical Slicing, Autenticação JWT e WebSockets.         |
+| `frontend/` | Dashboard SPA construído com React, consumindo a API com paginação em tempo real. |
 
-**Stack:** TypeScript, Express, Prisma, MySQL, React, Vite, Ant Design, Tailwind CSS, Socket.IO.
+**Stack Principal:** TypeScript, Express 5, Prisma ORM, MySQL, React, Vite, Tailwind CSS, Ant Design e Socket.IO.
 
 Documentação detalhada por camada:
 
@@ -20,96 +20,69 @@ Documentação detalhada por camada:
 
 ---
 
-## Pré-requisitos
+## 🧠 Arquitetura e Decisões Técnicas (Trade-offs)
 
-- [Docker](https://www.docker.com/) e Docker Compose
+Para demonstrar maturidade na engenharia de software, este projeto foi construído evitando _overengineering_, mas mantendo uma base sólida para escalabilidade:
 
-Para desenvolvimento local (opcional):
-
-- [Node.js](https://nodejs.org/) 20+
-- npm
-
----
-
-## Como executar (Docker)
-
-Com um único comando, sobe **MySQL**, **API** e **dashboard**:
-
-```bash
-docker compose up --build
-```
-
-Aguarde os containers iniciarem e acesse:
-
-| Serviço | URL |
-|---------|-----|
-| **Aplicação (frontend + API via proxy)** | http://localhost:8080 |
-
-**Credenciais de login** (padrão do `.env` / Docker):
-
-| Campo | Variável | Valor padrão |
-|-------|----------|--------------|
-| Email | `ADMIN_EMAIL` | `admin@email.com` |
-| Senha | `ADMIN_PASSWORD` | `admin` |
-
-O frontend (Nginx) serve o dashboard e faz proxy de `/api` (API), `/docs` (Swagger) e `/socket.io` para o backend. As rotas React (`/login`, `/dashboard`, etc.) ficam no frontend — não conflitam com a API.
-
-**Documentação da API (Swagger):** http://localhost:8080/docs
-
-**Alterações no código:** o container do frontend serve arquivos estáticos gerados no build. Mudanças no frontend **não aparecem automaticamente** — é preciso rebuildar:
-
-```bash
-docker compose up --build
-```
-
-Para desenvolvimento com hot reload (sem rebuild a cada alteração), use o frontend local com `npm run dev` (veja [desenvolvimento local](#desenvolvimento-local-opcional)).
-
-Para parar:
-
-```bash
-docker compose down
-```
-
-Para resetar o banco (apaga volumes):
-
-```bash
-docker compose down -v
-```
+- **Clean Architecture & Vertical Slicing:** O backend está organizado por domínios (ex: `customers`), separando responsabilidades em _Controllers_, _UseCases_ e _Repositories_. A injeção de dependência via construtor garante que os casos de uso sejam testáveis e totalmente desacoplados do Prisma ORM.
+- **Modelagem de Banco de Dados (YAGNI):** A tabela de cidades (`cities`) foi normalizada em uma relação 1:N com `customers` para garantir a performance e integridade do agrupamento de dados no Dashboard. Por outro lado, campos como `company` e `title` foram mantidos na tabela de clientes aplicando o princípio _You Aren't Gonna Need It_ (YAGNI), evitando a complexidade de _JOINs_ desnecessários onde o negócio não exige.
+- **Tratamento Global de Erros:** Utilização do Express 5 integrado a um Middleware Global e classes de erros customizadas (`AppError`). Isso mantém os _Controllers_ enxutos e garante respostas HTTP padronizadas.
+- **Comunicação em Tempo Real:** Uso de WebSockets (`Socket.IO`) para atualizar o dashboard reativamente quando um cliente é editado, evitando a sobrecarga de banco de dados causada por requisições de _Long Polling_.
+- **Frontend Desacoplado:** Uso intensivo de _Custom Hooks_ (ex: `useCityCustomers`) para isolar a lógica de requisições, estados e WebSockets, mantendo os componentes de UI puros e focados apenas na renderização.
 
 ---
 
-## Desenvolvimento local (opcional)
+## 🚀 Como Executar (Docker)
 
-Útil para hot reload durante o desenvolvimento.
+**Pré-requisitos:** [Docker](https://www.docker.com/) e Docker Compose instalados.
 
-**1. Banco de dados**
+Com um único comando, a infraestrutura completa sobe (MySQL, API e Frontend):
+
+```bash
+docker compose up --build -d
+```
+
+Aguarde os containers iniciais e acesse:
+
+| Serviço                              | URL                        |
+| ------------------------------------ | -------------------------- |
+| **Aplicação (Frontend + API Proxy)** | http://localhost:8080      |
+| **Documentação da API (Swagger)**    | http://localhost:8080/docs |
+
+**Credenciais de Acesso:**
+
+| Campo | Variável         | Valor Padrão      |
+| ----- | ---------------- | ----------------- |
+| Email | `ADMIN_EMAIL`    | `admin@email.com` |
+| Senha | `ADMIN_PASSWORD` | `admin`           |
+
+_(Nota: O Nginx serve o frontend e atua como proxy reverso, roteando as chamadas de `/api`, `/docs` e `/socket.io` diretamente para o backend)._
+
+---
+
+## 💻 Desenvolvimento Local
+
+Para desenvolvimento com _Hot Reload_ e testes manuais, você precisará do [Node.js](https://nodejs.org/) (v20+).
+
+**1. Banco de dados:**
 
 ```bash
 docker compose up db -d
 ```
 
-**2. Backend**
-
-```bash
-cd backend
-npm install
-npx prisma generate
-npx prisma db push
-npx prisma db seed
-```
-
-Crie `backend/.env` a partir do template:
+**2. Backend:**
 
 ```bash
 cd backend
 cp .env.example .env
-```
-
-```bash
+npm install
+npx prisma generate
+npx prisma db push
+npx prisma db seed
 npm run dev
 ```
 
-**3. Frontend**
+**3. Frontend:**
 
 ```bash
 cd frontend
@@ -117,17 +90,15 @@ npm install
 npm run dev
 ```
 
-Acesse http://localhost:5173/login — o Vite faz proxy de `/api` para a API em `localhost:3000`.
-
-> **Importante:** a API usa o prefixo `/api`. O frontend usa `/login` só como rota React; chamadas HTTP vão para `/api/login`.
+Acesse `http://localhost:5173/login`. (O Vite está configurado para fazer o proxy de `/api` para a porta 3000).
 
 ---
 
-## Autenticação
+## 🔐 Autenticação
 
-Todos os endpoints de clientes exigem JWT no header `Authorization: Bearer <token>`.
+Todos os endpoints de clientes exigem JWT no header: `Authorization: Bearer <token>`.
 
-**Login**
+**Login (Geração de Token)**
 
 ```http
 POST /api/login
@@ -139,139 +110,32 @@ Content-Type: application/json
 }
 ```
 
-**Resposta**
-
-```json
-{
-  "token": "<jwt>"
-}
-```
-
-No frontend, faça login em `/login` com as mesmas credenciais. O token é armazenado em `localStorage` e enviado automaticamente nas requisições.
+_O frontend gerencia o token via `localStorage` e o injeta automaticamente nas requisições subsequentes usando interceptadores do Axios._
 
 ---
 
-## Modelagem do banco
+## 🌐 Endpoints da API (Resumo)
 
-- **`cities`** — normalizada (agrupamento e navegação por cidade no dashboard)
-- **`customers`** — `company` e `title` como colunas de texto (atributos do cliente, sem tabelas separadas)
-
-Empresa e cargo não foram extraídos para tabelas próprias: não há requisito de agrupar ou filtrar por eles, e o volume de dados do teste não justifica joins extras.
-
----
-
-## Endpoints da API
-
-Via Docker, as rotas da API são acessíveis pelo mesmo host do frontend (`http://localhost:8080`). Em desenvolvimento local, a API responde diretamente em `http://localhost:3000`.
-
-Documentação interativa: **http://localhost:8080/docs** (Docker) ou **http://localhost:3000/docs** (local).
-
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| `POST` | `/api/login` | Autenticação (público) |
-| `GET` | `/api/customers/totals-by-city` | Total de clientes agrupados por cidade |
-| `GET` | `/api/customers?city={cidade}&page={n}&limit={n}` | Clientes de uma cidade (paginado) |
-| `GET` | `/api/customers/:id` | Detalhes de um cliente |
-| `PUT` | `/api/customers/:id` | Atualizar um cliente |
-
-### Exemplos de resposta
-
-**Total por cidade**
-
-```json
-[
-  { "city": "Warner, NH", "customers_total": 20 }
-]
-```
-
-**Listagem por cidade**
-
-```json
-{
-  "customers": [
-    {
-      "id": 1,
-      "first_name": "Laura",
-      "last_name": "Richards",
-      "email": "lrichards0@reverbnation.com",
-      "company": "Meezzy"
-    }
-  ],
-  "total": 20
-}
-```
-
-**Cliente por ID**
-
-```json
-{
-  "id": 1,
-  "first_name": "Laura",
-  "last_name": "Richards",
-  "email": "lrichards0@reverbnation.com",
-  "gender": "Female",
-  "company": "Meezzy",
-  "city": "Warner, NH",
-  "title": "Biostatistician III"
-}
-```
-
-Ao editar um cliente (`PUT /api/customers/:id`), a API emite o evento WebSocket `customer_updated`, atualizando o dashboard em tempo real.
+| Método | Rota                                              | Descrição                                     |
+| ------ | ------------------------------------------------- | --------------------------------------------- |
+| `POST` | `/api/login`                                      | Autenticação e emissão de JWT.                |
+| `GET`  | `/api/customers/totals-by-city`                   | Contagem agregada de clientes por cidade.     |
+| `GET`  | `/api/customers?city={cidade}&page={n}&limit={n}` | Listagem paginada por cidade.                 |
+| `GET`  | `/api/customers/:id`                              | Detalhes de um cliente específico.            |
+| `PUT`  | `/api/customers/:id`                              | Edição de cliente (Dispara evento WebSocket). |
 
 ---
 
-## Frontend — rotas
+## 🛠️ Qualidade de Código e Testes
 
-| Rota | Página |
-|------|--------|
-| `/login` | Login |
-| `/dashboard` | Cards com total de clientes por cidade |
-| `/city/:cityName` | Lista paginada de clientes da cidade |
-| `/customer/:id` | Detalhes e edição do cliente |
+O repositório possui rigorosas verificações de qualidade:
 
----
+- **Testes Unitários:** Testes de comportamento cobrindo regras de negócio e ramificações de erro (Jest).
+- **CI/CD:** _GitHub Actions_ executa Linting, Type-Checking e a suíte de testes em cada PR direcionado à branch `main`.
 
-## Scripts úteis (raiz)
-
-Requer Node.js instalado localmente:
-
-```bash
-# Type-check de backend e frontend
-npm run type-check
-
-# Build de produção
-npm run build
-```
-
-Scripts específicos de cada pacote estão nos READMEs de [backend](./backend/README.md) e [frontend](./frontend/README.md).
-
----
-
-## Testes
-
-Testes unitários da API (use cases):
+**Rodar os testes localmente:**
 
 ```bash
 cd backend
 npm test
 ```
-
-A pipeline de CI (GitHub Actions) executa lint, testes e build a cada push/PR na branch `main`.
-
----
-
-## Estrutura do repositório
-
-```
-tech-test-native/
-├── backend/            # API REST + Prisma + Dockerfile
-├── frontend/           # Dashboard React + Dockerfile (Nginx)
-├── docker-compose.yml  # Orquestra db + backend + frontend
-└── .github/workflows/ci.yml
-```
-
----
-
-## Dados iniciais
-
-Os clientes são carregados a partir de `backend/prisma/customers.json` via seed do Prisma. O schema normaliza cidades em uma tabela `cities` relacionada a `customers`.

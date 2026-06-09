@@ -1,127 +1,109 @@
-# Frontend — Tech Test Native
+# Frontend — Customer Dashboard
 
-Dashboard em **React** e **TypeScript** para visualizar clientes por cidade, navegar listagens paginadas e editar detalhes, com atualização em tempo real via WebSocket.
+Dashboard Single Page Application (SPA) construído com **React** e **TypeScript** para gerenciamento de clientes. Focado em performance, reatividade em tempo real e arquitetura escalável.
 
-Para executar o projeto completo com um comando, consulte o [README da raiz](../README.md).
-
----
-
-## Tecnologias
-
-| Tecnologia | Uso |
-|------------|-----|
-| React 19 | UI |
-| Vite 8 | Build e dev server |
-| React Router 7 | Navegação |
-| Ant Design 6 | Componentes (cards, tabela, formulário) |
-| Tailwind CSS 4 | Estilização utilitária |
-| Axios | Requisições HTTP |
-| Socket.IO Client | Atualização do dashboard em tempo real |
-| Nginx | Servidor estático e proxy reverso (Docker) |
+Para executar o projeto completo via Docker, consulte o [README da raiz](../README.md).
 
 ---
 
-## Arquitetura
+## 🛠️ Tecnologias e Ecossistema
 
-```
-src/
-├── data/
-│   └── services/       # Comunicação com API e WebSocket
-│       ├── api.ts          # Instância Axios + interceptor JWT
-│       ├── AuthService.ts
-│       ├── CustomerService.ts
-│       └── socket.ts
-├── domain/
-│   └── models/         # Tipos compartilhados (ex.: AuthToken)
-└── presentation/
-    ├── components/     # AuthGuard e componentes reutilizáveis
-    ├── pages/          # Telas + hooks de cada página
-    └── routes/         # Definição de rotas
-```
-
-Cada página segue o padrão **componente + hook** (`index.tsx` + `use*.ts`), separando UI da lógica de dados.
+| Tecnologia           | Uso                                                      |
+| -------------------- | -------------------------------------------------------- |
+| **React 19**         | Renderização da Interface de Usuário                     |
+| **Vite 8**           | Build tool ultrarrápido e Dev Server                     |
+| **React Router 7**   | Roteamento declarativo no client-side                    |
+| **Ant Design 6**     | Biblioteca de componentes robusta (Tabelas, Formulários) |
+| **Tailwind CSS 4**   | Estilização utilitária e responsiva                      |
+| **Axios**            | Cliente HTTP configurado com interceptadores             |
+| **Socket.IO Client** | Sincronização de dados em tempo real (WebSockets)        |
+| **Nginx**            | Servidor web estático e Proxy Reverso (Ambiente Docker)  |
 
 ---
 
-## Páginas e rotas
+## 🧠 Arquitetura e Decisões de Design
 
-| Rota | Componente | Descrição |
-|------|------------|-----------|
-| `/login` | `Login` | Autenticação com JWT |
-| `/dashboard` | `Dashboard` | Cards clicáveis com total de clientes por cidade |
-| `/city/:cityName` | `CityCustomers` | Tabela paginada; clique na linha abre detalhes |
-| `/customer/:id` | `CustomerDetails` | Formulário de edição do cliente |
+Para garantir que o projeto seja fácil de manter e escalar, o frontend foi estruturado aplicando princípios de **Clean Architecture** adaptados para o ecossistema React:
 
-Rotas protegidas passam pelo `AuthGuard`, que redireciona para `/login` se não houver token em `localStorage` (`@TechTest:token`).
+    src/
+    ├── data/
+    │   └── services/       # Camada de comunicação (API, HTTP, WebSockets)
+    ├── domain/
+    │   └── models/         # Interfaces e Tipagens de domínio compartilhadas
+    └── presentation/
+        ├── components/     # Componentes visuais burros (Dumb Components) e Guards
+        ├── pages/          # Páginas roteáveis (Smart Components)
+        └── routes/         # Configuração centralizada de navegação
 
----
+### O Padrão de Isolamento (Custom Hooks)
 
-## Integração com a API
+Em vez de misturar JSX, requisições HTTP e controle de estado no mesmo arquivo, cada página segue o padrão de **Separação de Lógica e Apresentação**:
 
-As requisições usam URLs relativas (`baseURL` vazio), o que permite:
-
-- **Docker:** Nginx faz proxy de `/api`, `/docs` e `/socket.io` para o backend
-- **Dev local:** Vite proxy encaminha `/api` para `localhost:3000` (base URL do Axios: `/api`)
-
-O interceptor do Axios anexa automaticamente o header:
-
-```http
-Authorization: Bearer <token>
-```
-
-**WebSocket:** conecta na mesma origem da aplicação. O dashboard e a listagem por cidade escutam o evento `customer_updated` e recarregam os dados após uma edição.
-
-Opcionalmente, defina `VITE_API_URL` para apontar a outro host (ex.: em deploy customizado).
+- `index.tsx`: Focado 100% na UI, renderização e uso de componentes do Ant Design/Tailwind.
+- `use[PageName].ts`: Um Custom Hook dedicado que encapsula todo o ciclo de vida, chamadas de API e escuta de WebSockets.
 
 ---
 
-## Docker
+## 🚦 Páginas e Fluxo de Usuário
 
-O `Dockerfile` faz build de produção com Vite e serve os arquivos estáticos via Nginx. A configuração em `nginx.conf` inclui:
+A navegação é protegida por um componente `AuthGuard`. Se um usuário não autenticado tentar acessar rotas internas, será redirecionado imediatamente para o `/login`.
 
-- Fallback SPA (`try_files` → `index.html`)
-- Proxy reverso para a API e WebSocket do backend
-
-No `docker compose up`, acesse http://localhost:8080
-
-> **Nota:** alterações no código do frontend exigem `docker compose up --build` para refletir na tela. Para hot reload, use `npm run dev` localmente.
-
----
-
-## Executar localmente
-
-**Pré-requisito:** API rodando em http://localhost:3000
-
-```bash
-npm install
-npm run dev
-```
-
-Acesse http://localhost:5173 e faça login com:
-
-| Campo | Valor |
-|-------|-------|
-| Email | `admin@email.com` |
-| Senha | `admin` |
+| Rota              | Componente        | Responsabilidade                                                                 |
+| ----------------- | ----------------- | -------------------------------------------------------------------------------- |
+| `/login`          | `Login`           | Autenticação, emissão e armazenamento do JWT.                                    |
+| `/dashboard`      | `Dashboard`       | Visão panorâmica: Cards reativos com o agrupamento total de clientes por cidade. |
+| `/city/:cityName` | `CityCustomers`   | Data Table com paginação nativa (Server-side) listando os clientes da cidade.    |
+| `/customer/:id`   | `CustomerDetails` | Formulário de edição. Salvar dispara um evento global de atualização.            |
 
 ---
 
-## Scripts
+## 🔌 Integração, API e Tempo Real
 
-```bash
-npm run dev          # Dev server com HMR
-npm run build        # Build de produção (dist/)
-npm run preview      # Preview do build
-npm run type-check   # Verificação de tipos
-npm run lint         # ESLint
-npm run format       # Prettier
-```
+As requisições HTTP foram desenhadas para funcionar de forma fluida tanto localmente quanto em contêineres:
+
+- **Estratégia de Proxy:** A base URL do Axios é uma rota relativa (`/api`). No Docker, o **Nginx** intercepta e redireciona para o backend. No desenvolvimento local, o **Vite** assume o papel de proxy. Isso resolve problemas de CORS e mantém o código agnóstico de ambiente.
+- **Interceptador JWT:** O Axios está configurado para injetar automaticamente o cabeçalho `Authorization: Bearer <token>` em todas as requisições protegidas, lendo o token diretamente do `localStorage`.
+- **Reatividade (WebSocket):** O frontend estabelece uma conexão com o Socket.IO. Sempre que a API emite o evento `customer_updated` (indicando que outro usuário editou um cliente), o Dashboard e as listagens recarregam seus dados silenciosamente em background, mantendo a tela atualizada sem necessidade de F5.
 
 ---
 
-## Fluxo do usuário
+## 🐳 Docker e Produção
 
-1. **Login** — obtém JWT e armazena no `localStorage`
-2. **Dashboard** — cards exibem `{ city, customers_total }`; clique navega para a cidade
-3. **Lista por cidade** — paginação de 10 itens; clique no cliente abre detalhes
-4. **Detalhes** — formulário de edição; ao salvar, a API emite WebSocket e o dashboard atualiza automaticamente
+O `Dockerfile` desta camada utiliza um build multi-stage:
+
+1. Compila a aplicação estática e minificada usando o Vite.
+2. Serve os arquivos resultantes usando um contêiner **Nginx** otimizado.
+
+O arquivo `nginx.conf` inclui:
+
+- Resolução de Fallback para SPA (`try_files $uri /index.html`).
+- Proxy Reverso para `/api`, `/docs` e handshake do `/socket.io`.
+
+_(Nota: Para refletir alterações de código no contêiner, é necessário rodar `docker compose up --build`)._
+
+---
+
+## 💻 Como Executar Localmente (Dev Mode)
+
+Para usufruir do _Hot Module Replacement (HMR)_ durante o desenvolvimento:
+
+**Pré-requisito:** Certifique-se de que a API (Backend) esteja rodando em `http://localhost:3000`.
+
+    npm install
+    npm run dev
+
+Acesse `http://localhost:5173` no navegador e faça login com:
+
+- **Email:** `admin@email.com`
+- **Senha:** `admin`
+
+---
+
+## 📜 Scripts Disponíveis
+
+    npm run dev          # Inicia o servidor de desenvolvimento Vite com HMR
+    npm run build        # Gera o bundle otimizado para produção na pasta dist/
+    npm run preview      # Simula o servidor de produção localmente
+    npm run type-check   # Executa o compilador TS para validação estática de tipos
+    npm run lint         # Executa a verificação de regras do ESLint
+    npm run format       # Formata o código fonte com o Prettier

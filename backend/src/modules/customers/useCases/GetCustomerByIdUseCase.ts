@@ -1,26 +1,18 @@
-import { prisma } from "../../../shared/infra/database/prisma/client";
-import { Customer } from "../domain/customer";
+import { Customer } from "../domain/Customer";
 import { AppError } from "../../../shared/errors/AppError";
 import { apiErrorCodes } from "../../../shared/errors/apiErrorCodes";
+import { CustomerRepository } from "../infra/database/repositories/CustomerRepository";
 
 export class GetCustomerByIdUseCase {
+  constructor(private customerRepository: CustomerRepository) {}
+
   async execute(id: number): Promise<Customer> {
-    const customer = await prisma.customer.findUnique({
-      where: { id },
-      include: {
-        city: true,
-      },
-    });
+    const customer = await this.customerRepository.findById(id);
 
     if (!customer) {
       throw new AppError("Customer not found", 404, apiErrorCodes.CUSTOMER_NOT_FOUND);
     }
 
-    const { city_id, city, ...rest } = customer;
-
-    return {
-      ...rest,
-      city: city.name,
-    };
+    return customer;
   }
 }

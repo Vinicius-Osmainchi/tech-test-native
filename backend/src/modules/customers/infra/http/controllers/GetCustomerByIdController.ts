@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { GetCustomerByIdUseCase } from "../../../useCases/GetCustomerByIdUseCase";
 import { AppError } from "../../../../../shared/errors/AppError";
 import { apiErrorCodes } from "../../../../../shared/errors/apiErrorCodes";
+import { CustomerRepository } from "../../database/repositories/CustomerRepository";
 
 export class GetCustomerByIdController {
   async handle(request: Request, response: Response): Promise<Response> {
@@ -12,7 +13,8 @@ export class GetCustomerByIdController {
       throw new AppError("Invalid ID format", 400, apiErrorCodes.INVALID_ID_FORMAT);
     }
 
-    const useCase = new GetCustomerByIdUseCase();
+    const customerRepository = new CustomerRepository();
+    const useCase = new GetCustomerByIdUseCase(customerRepository);
 
     try {
       const customer = await useCase.execute(parsedId);

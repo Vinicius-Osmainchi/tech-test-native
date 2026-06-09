@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { type Customer, CustomerService } from "../../../data/services/CustomerService";
+import { type Customer, CustomerService } from "../../../data/services/customerService";
 import { uiMessages } from "../../../shared/messages";
 import { Form } from "antd";
 

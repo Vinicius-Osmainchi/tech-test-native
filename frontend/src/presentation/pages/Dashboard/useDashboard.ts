@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { type CityTotal, CustomerService } from "../../../data/services/CustomerService";
+import { type CityTotal, CustomerService } from "../../../data/services/customerService";
 import { socket } from "../../../data/services/socket";
 import { uiMessages } from "../../../shared/messages";
 

@@ -1,102 +1,62 @@
 import { UpdateCustomerUseCase } from "./UpdateCustomerUseCase";
-import { prisma } from "../../../shared/infra/database/prisma/client";
+import { CustomerRepository } from "../infra/database/repositories/CustomerRepository";
 import { apiErrorCodes } from "../../../shared/errors/apiErrorCodes";
 
-jest.mock("../../../shared/infra/database/prisma/client", () => ({
-  prisma: {
-    customer: { findUnique: jest.fn(), update: jest.fn() },
-    city: { upsert: jest.fn() },
-  },
-}));
+jest.mock("../infra/database/repositories/CustomerRepository");
 
 describe("UpdateCustomerUseCase", () => {
+  let customerRepository: jest.Mocked<CustomerRepository>;
+  let useCase: UpdateCustomerUseCase;
+
   beforeEach(() => {
-    jest.clearAllMocks();
+    customerRepository = new CustomerRepository() as jest.Mocked<CustomerRepository>;
+    useCase = new UpdateCustomerUseCase(customerRepository);
   });
 
-  it("should update customer fields without changing city", async () => {
-    const mockExistingCustomer = { id: 1, city_id: 1 };
+  it("should update a customer when exists", async () => {
     const mockUpdatedCustomer = {
       id: 1,
-      first_name: "Laura Updated",
-      last_name: "Richards",
-      email: "lrichards0@reverbnation.com",
-      gender: "Female",
-      company: "Meezzy",
-      title: "Biostatistician III",
-      city_id: 1,
-      city: { id: 1, name: "Warner, NH" },
+      first_name: "John",
+      last_name: "Updated",
+      email: "john.updated@example.com",
+      phone: "1234567890",
+      city: "New York",
+      gender: "Male",
+      company: "Acme",
+      title: "Engineer",
     };
 
-    (prisma.customer.findUnique as jest.Mock).mockResolvedValue(mockExistingCustomer);
-    (prisma.customer.update as jest.Mock).mockResolvedValue(mockUpdatedCustomer);
+    customerRepository.exists.mockResolvedValue(true);
+    customerRepository.update.mockResolvedValue(mockUpdatedCustomer);
 
-    const useCase = new UpdateCustomerUseCase();
     const result = await useCase.execute({
       id: 1,
-      first_name: "Laura Updated",
+      first_name: "John",
+      last_name: "Updated",
+      email: "john.updated@example.com",
     });
 
-    expect(prisma.city.upsert).not.toHaveBeenCalled();
-    expect(prisma.customer.update).toHaveBeenCalledWith({
-      where: { id: 1 },
-      data: { first_name: "Laura Updated", city_id: 1 },
-      include: { city: true },
-    });
-    expect(result).toEqual({
+    expect(result).toEqual(mockUpdatedCustomer);
+    expect(customerRepository.exists).toHaveBeenCalledWith(1);
+    expect(customerRepository.update).toHaveBeenCalledWith({
       id: 1,
-      first_name: "Laura Updated",
-      last_name: "Richards",
-      email: "lrichards0@reverbnation.com",
-      gender: "Female",
-      company: "Meezzy",
-      title: "Biostatistician III",
-      city: "Warner, NH",
+      first_name: "John",
+      last_name: "Updated",
+      email: "john.updated@example.com",
     });
   });
 
-  it("should upsert city when city is provided", async () => {
-    const mockExistingCustomer = { id: 1, city_id: 1 };
-    const mockNewCity = { id: 2, name: "New City" };
-    const mockUpdatedCustomer = {
-      id: 1,
-      first_name: "Laura Updated",
-      last_name: "Richards",
-      email: "lrichards0@reverbnation.com",
-      gender: "Female",
-      company: "Meezzy",
-      title: "Biostatistician III",
-      city_id: 2,
-      city: { id: 2, name: "New City" },
-    };
+  it("should throw AppError when customer not found", async () => {
+    customerRepository.exists.mockResolvedValue(false);
 
-    (prisma.customer.findUnique as jest.Mock).mockResolvedValue(mockExistingCustomer);
-    (prisma.city.upsert as jest.Mock).mockResolvedValue(mockNewCity);
-    (prisma.customer.update as jest.Mock).mockResolvedValue(mockUpdatedCustomer);
-
-    const useCase = new UpdateCustomerUseCase();
-    const result = await useCase.execute({
-      id: 1,
-      first_name: "Laura Updated",
-      city: "New City",
-    });
-
-    expect(prisma.city.upsert).toHaveBeenCalledWith({
-      where: { name: "New City" },
-      update: {},
-      create: { name: "New City" },
-    });
-
-    expect(result.city).toBe("New City");
-    expect(result.first_name).toBe("Laura Updated");
-  });
-
-  it("should throw when customer is not found", async () => {
-    (prisma.customer.findUnique as jest.Mock).mockResolvedValue(null);
-
-    const useCase = new UpdateCustomerUseCase();
-
-    await expect(useCase.execute({ id: 999, first_name: "Nonexistent" })).rejects.toMatchObject({
+    await expect(
+      useCase.execute({
+        id: 999,
+        first_name: "John",
+        last_name: "Updated",
+        email: "john.updated@example.com",
+      }),
+    ).rejects.toMatchObject({
       message: "Customer not found",
       statusCode: 404,
       code: apiErrorCodes.CUSTOMER_NOT_FOUND,

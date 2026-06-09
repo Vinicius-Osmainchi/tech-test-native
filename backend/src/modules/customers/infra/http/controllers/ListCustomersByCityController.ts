@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { ListCustomersByCityUseCase } from "../../../useCases/ListCustomersByCityUseCase";
 import { AppError } from "../../../../../shared/errors/AppError";
+import { CustomerRepository } from "../../database/repositories/CustomerRepository";
 
 export class ListCustomersByCityController {
   async handle(request: Request, response: Response): Promise<Response> {
@@ -22,7 +23,8 @@ export class ListCustomersByCityController {
       throw new AppError("Limit must be a positive number.");
     }
 
-    const useCase = new ListCustomersByCityUseCase();
+    const customerRepository = new CustomerRepository();
+    const useCase = new ListCustomersByCityUseCase(customerRepository);
     const result = await useCase.execute(cityValue, pageValue, limitValue);
 
     return response.status(200).json(result);

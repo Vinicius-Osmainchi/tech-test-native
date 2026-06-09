@@ -1,47 +1,28 @@
 import { GetCustomersTotalByCityUseCase } from "./GetCustomersTotalByCityUseCase";
-import { prisma } from "../../../shared/infra/database/prisma/client";
+import { CustomerRepository } from "../infra/database/repositories/CustomerRepository";
 
-jest.mock("../../../shared/infra/database/prisma/client", () => ({
-  prisma: {
-    city: { findMany: jest.fn() },
-  },
-}));
+jest.mock("../infra/database/repositories/CustomerRepository");
 
 describe("GetCustomersTotalByCityUseCase", () => {
+  let customerRepository: jest.Mocked<CustomerRepository>;
+  let useCase: GetCustomersTotalByCityUseCase;
+
   beforeEach(() => {
-    jest.clearAllMocks();
+    customerRepository = new CustomerRepository() as jest.Mocked<CustomerRepository>;
+    useCase = new GetCustomersTotalByCityUseCase(customerRepository);
   });
 
-  it("should map prisma result to API response format", async () => {
-    const mockCities = [
-      { name: "Warner, NH", _count: { customers: 20 } },
-      { name: "Lisboa", _count: { customers: 15 } },
+  it("should return total customers by city", async () => {
+    const mockTotals = [
+      { city: "New York", customers_total: 100 },
+      { city: "Los Angeles", customers_total: 50 },
     ];
 
-    (prisma.city.findMany as jest.Mock).mockResolvedValue(mockCities);
+    customerRepository.getTotalsByCity.mockResolvedValue(mockTotals);
 
-    const useCase = new GetCustomersTotalByCityUseCase();
     const result = await useCase.execute();
 
-    expect(prisma.city.findMany).toHaveBeenCalledWith({
-      select: {
-        name: true,
-        _count: { select: { customers: true } },
-      },
-    });
-
-    expect(result).toEqual([
-      { city: "Warner, NH", customers_total: 20 },
-      { city: "Lisboa", customers_total: 15 },
-    ]);
-  });
-
-  it("should return empty array when there are no cities", async () => {
-    (prisma.city.findMany as jest.Mock).mockResolvedValue([]);
-
-    const useCase = new GetCustomersTotalByCityUseCase();
-    const result = await useCase.execute();
-
-    expect(result).toEqual([]);
+    expect(result).toEqual(mockTotals);
+    expect(customerRepository.getTotalsByCity).toHaveBeenCalled();
   });
 });
