@@ -3,7 +3,7 @@ import {
   type Customer,
   CustomerService,
   type PaginatedCustomers,
-} from "../../../data/services/customerServiceTemp";
+} from "../../../data/services/customerService";
 import { socket } from "../../../data/services/socket";
 import { uiMessages } from "../../../shared/messages";
 
