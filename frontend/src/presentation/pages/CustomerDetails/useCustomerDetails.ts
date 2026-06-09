@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { type Customer, CustomerService } from "../../../data/services/customerService";
+import { type Customer, CustomerService } from "../../../data/services/customerServiceTemp";
 import { uiMessages } from "../../../shared/messages";
 import { Form } from "antd";
 
@@ -23,7 +23,7 @@ export const useCustomerDetails = (id: string | undefined) => {
     }
 
     CustomerService.getCustomerById(Number(id))
-      .then((data) => {
+      .then((data: Customer) => {
         if (isMounted) {
           form.setFieldsValue(data);
           setError(null);

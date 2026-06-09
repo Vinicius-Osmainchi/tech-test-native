@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { type Customer, CustomerService } from "../../../data/services/customerService";
+import {
+  type Customer,
+  CustomerService,
+  type PaginatedCustomers,
+} from "../../../data/services/customerServiceTemp";
 import { socket } from "../../../data/services/socket";
 import { uiMessages } from "../../../shared/messages";
 
@@ -21,7 +25,7 @@ export const useCityCustomers = (cityName: string | undefined) => {
     let isMounted = true;
 
     CustomerService.getCustomersByCity(cityName, currentPage, pageSize)
-      .then((response) => {
+      .then((response: PaginatedCustomers) => {
         if (isMounted) {
           setData(response.customers);
           setTotal(response.total);
