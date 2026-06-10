@@ -11,7 +11,7 @@ export function Login() {
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <Card className="flex justify-center w-100 shadow-md">
         <Title level={2} className="text-center mb-6!">
-          Native Tech Test
+          Fullstack Customer Dashboard
         </Title>
 
         {error && (

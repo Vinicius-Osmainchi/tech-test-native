@@ -1,7 +1,7 @@
 export const openApiDocument = {
   openapi: "3.0.3",
   info: {
-    title: "Tech Test Native — API",
+    title: "Fullstack Customer Dashboard — API",
     description:
       "API REST para consulta e edição de clientes. Autenticação JWT obrigatória nas rotas de clientes.",
     version: "1.0.0",
